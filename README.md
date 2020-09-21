@@ -1,5 +1,10 @@
 # HIVE
-Bachelor's thesis
+Requirements:
+numpy==1.18.5
+gym==0.17.2
+keras_rl2==1.0.4
+Keras==2.4.3
+rl==3.0
 
 Changelog:
 
