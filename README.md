@@ -1,12 +1,20 @@
 # HIVE
 Requirements:
 - numpy==1.18.5
-- gym==0.17.2
-- keras_rl2==1.0.4
 - Keras==2.4.3
+- keras_rl2==1.0.4
+- tensorflow==2.3.0
+- gym==0.17.2
 - rl==3.0
+- theano==1.0.5
 
 Changelog:
+
+28.10
+- created stable, developable version of two neural nets playing PD against each other using:
+  i) custom OpenAI gym
+  ii) custom keras-rl2 agent
+  iii) custom keras-rl2 callbacks
 
 21.09
 - created OpenAI custom gym environment
