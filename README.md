@@ -12,9 +12,9 @@ Changelog:
 
 28.10
 - created stable, developable version of two neural nets playing PD against each other using:
-  i) custom OpenAI gym
-  ii) custom keras-rl2 agent
-  iii) custom keras-rl2 callbacks
+  - custom OpenAI gym
+  - custom keras-rl2 agent
+  - custom keras-rl2 callbacks
 
 21.09
 - created OpenAI custom gym environment
