@@ -1,5 +1,7 @@
 numpy==1.18.5
-gym==0.17.2
-keras_rl2==1.0.4
 Keras==2.4.3
+keras_rl2==1.0.4
+tensorflow==2.3.0
+gym==0.17.2
 rl==3.0
+theano==1.0.5
