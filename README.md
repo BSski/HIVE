@@ -10,6 +10,11 @@ Requirements:
 
 Changelog:
 
+04.11
+- more than two players can play now (interleaved training)
+- added 7 NPCs with popular PD strategies
+- players now include current episode step and type of an enemy in their observations
+
 28.10
 - created stable, developable version of two neural nets playing PD against each other using:
   - custom OpenAI gym
