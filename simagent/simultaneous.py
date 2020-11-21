@@ -22,18 +22,9 @@ class SimultaneousAgent(TwoAgentsAgent):
 
         self.current_game_number = -1  # Used to append steps to proper games.
         self.current_game = [], []
-        self.agents_games_log = [[],  # Agent0 games
-                                 [],  # Agent1 games
-                                 [],  # Agent2 games
-                                 [],  # Agent3 games
-                                 []   # Agent4 games
-                                 ]
-
-
-
-
-
-
+        self.agents_games_log = []
+        for i in range(self.n):
+            self.agents_games_log.append([])
 
 
     @property
@@ -82,14 +73,17 @@ class SimultaneousAgent(TwoAgentsAgent):
             self.player_one = self.current_fight[1]
 
             print("####### AGENTS PLAYING:",self.player, self.player_one)
+            self.current_game[0].append([self.player, self.player_one])
+            self.current_game[1].append([self.player_one, self.player])
+
             if self.current_fight_number == 0:
                 self.current_game_number += 1
 
-        print(observation[0], self.game_step, self.player_one)
-        print(observation[1], self.game_step, self.player)
+        print(observation[0], self.game_step, self.player_one, observation[3][1])
+        print(observation[1], self.game_step, self.player, observation[3][0])
 
-        current_players_actions = [self.agents[self.player].forward([observation[0], self.game_step, self.player_one]),
-                                    self.agents[self.player_one].forward([observation[1], self.game_step, self.player])]
+        current_players_actions = [self.agents[self.player].forward([observation[0], self.game_step, self.player_one, observation[3][1]]),
+                                    self.agents[self.player_one].forward([observation[1], self.game_step, self.player, observation[3][0]])]
 
         if self.game_step != 19:
             self.current_game[0].append(current_players_actions[0])
@@ -155,7 +149,8 @@ class SimultaneousAgent(TwoAgentsAgent):
         """
         fbase, fext = splitext(filepath)
         for i, agent in enumerate(self.agents):
-            agent.load_weights('%s%i%s' % (fbase,i,fext))
+            if i <= 1:
+                agent.load_weights('%s%i%s' % (fbase,i,fext))
 
     def save_weights(self, filepath, overwrite=False):
         """Saves the weights of an agent as an HDF5 file.
@@ -165,7 +160,8 @@ class SimultaneousAgent(TwoAgentsAgent):
         """
         fbase, fext = splitext(filepath)
         for i, agent in enumerate(self.agents):
-            agent.save_weights('%s%i%s' % (fbase,i,fext), overwrite)
+            if i <= 1:
+                agent.save_weights('%s%i%s' % (fbase,i,fext), overwrite)
 
     @property
     def layers(self):
@@ -198,15 +194,7 @@ class SimultaneousAgent(TwoAgentsAgent):
         """
         for agent in self.agents:
             agent._on_train_end()
-        #print(self.agents_games_log)
-        """
-        for i in range(len(self.agents_games_log)):
-            for j in range(len(self.agents_games_log[i])):
-                for k in range(len(self.agents_games_log[i][j])):
-                    for l in range(len(self.agents_games_log[i][j][k])):
-                        print(self.agents_games_log[i][j][k][l], end='')
-                    print("\n")
-        """
+
     def _on_test_begin(self):
         """Callback that is called before testing begins."
         """
@@ -218,3 +206,40 @@ class SimultaneousAgent(TwoAgentsAgent):
         """
         for agent in self.agents:
             agent._on_test_end()
+
+
+    def get_fights_list(self):
+        return self.agents_games_log
+
+    def get_n(self):
+        return self.n
+
+    def forward_test(self, observation, x, y):
+        self.player = x
+        self.player_one = y
+        self.game_step = observation[2]
+        if self.game_step == -1:
+            print("####### AGENTS PLAYING:", x, y)
+
+            if self.current_fight_number == 0:
+                self.current_game_number += 1
+        current_players_actions = [self.agents[x].forward([observation[0], self.game_step, y, observation[3][1]]),
+                                    self.agents[y].forward([observation[1], self.game_step, x, observation[3][0]])]
+        return current_players_actions
+
+    def backward_test(self, reward, terminal):
+        """Updates the agent after having executed the action returned by `forward`.
+        If the policy is implemented by a neural network, this corresponds to a weight update using back-prop.
+        # Argument
+            reward (float): The observed reward after executing the action returned by `forward`.
+            terminal (boolean): `True` if the new state of the environment is terminal.
+        # Returns
+            List of metrics values
+        """
+        if self.game_step == 19:
+            self.agents_games_log[self.player].append([self.current_game[0], self.current_game[1]])
+            self.agents_games_log[self.player_one].append([self.current_game[1], self.current_game[0]])
+            self.current_game = [], []
+
+        return [self.agents[self.player].backward(reward[0],terminal),
+                self.agents[self.player_one].backward(reward[1],terminal)]

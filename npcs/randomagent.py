@@ -10,7 +10,6 @@ class RandomAgent(Agent):
     def __init__(self):
         super(RandomAgent, self).__init__()
         self.counter = -1
-        self.action_next = None
         self.compiled = False
         # State.
         self.reset_states()

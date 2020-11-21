@@ -206,7 +206,7 @@ class TrainEpisodeLogger(Callback):
         mean action: {action_mean:.3f} [{action_min:.3f}, {action_max:.3f}],  {metrics}'
         '''
         # Custom:
-        template = '\n===============================================================================\n     {step: ' + nb_step_digits + 'd}/{nb_steps}: episode: {episode},  duration: {duration:.3f}s,  steps per second: {sps:3.0f}\n-------------------------------------------------------------------------------\nepisode reward: {episode_reward},  mean reward:{reward_mean:6.2f} [{reward_min}, {reward_max}],  mean action: {action_mean:.2f},\n{metrics}\n-------------------------------------------------------------------------------\nepisode_reward1: {episode_reward1},  mean reward1:{reward1_mean:6.2f} [{reward1_min}, {reward1_max}],  mean action1: {action1_mean:.2f},\n{metrics1}\n===============================================================================\n'
+        template = '\n===============================================================================\n     {step: ' + nb_step_digits + 'd}/{nb_steps}: episode: {episode},  duration: {duration:.3f}s,  steps per second: {sps:3.0f}\n-------------------------------------------------------------------------------\nepisode reward: {episode_reward},  mean reward:{reward_mean:6.2f} [{reward_min}, {reward_max}],  mean action: {action_mean:.2f},\n{metrics}\n-------------------------------------------------------------------------------\nepisode reward1: {episode_reward1},  mean reward1:{reward1_mean:6.2f} [{reward1_min}, {reward1_max}],  mean action1: {action1_mean:.2f},\n{metrics1}\n===============================================================================\n'
 
         variables = {
             'step': self.step,

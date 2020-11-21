@@ -9,7 +9,7 @@ class TitForTatAgent(Agent):
     """
     def __init__(self):
         super(TitForTatAgent, self).__init__()
-        self.counter = 0
+        self.counter = -1
         self.compiled = False
         # State.
         self.reset_states()
@@ -26,12 +26,12 @@ class TitForTatAgent(Agent):
         self.counter += 1
 
         if self.counter == 0:
-            action = 1
+            action = 0
         else:
             action = observation[0]
 
-        if self.counter == 19:
-            self.counter = 0
+        if self.counter == 20:
+            self.counter = -1
 
         # Book-keeping.
         self.recent_observation = observation
