@@ -8,20 +8,21 @@ from gym.utils import seeding
 
 class TdhEnv(gym.Env):
     def __init__(self):
+        self.rewards_setting = [
+                                [20, 20],   # MUTUAL COOP
+                                [24, -6], # DECEIT
+                                [-6, 24], # DECEIT
+                                [-2, -2]  # MUTUAL DECEIT
+                                ]
         self.action_space = spaces.Box(low=np.array([0]), high=np.array([1]), dtype=np.int)
-        self.observation_space = spaces.Box(low=np.array([0, 0, 0]), high=np.array([1, 20, 4]), dtype=np.int)
+        # observation space, czyli zakres wartości, które przekazuję sieciom agentów jako input w pliku simultaneous.py (funkcja forward)
+        self.observation_space = spaces.Box(low=np.array([0, 0, 0, -6]), high=np.array([1, 20, 4, 34]), dtype=np.int)
         self.steps_counter = -1
         self.episodes_counter = 1
         self.game = []
         self.rewards = [0, 0]
-        self.observation = [random.randint(0, 1), random.randint(0, 1), self.steps_counter, 0]
+        self.observation = [random.randint(0, 1), random.randint(0, 1), self.steps_counter, [0, 0]]
         # self.cash = 200
-        self.rewards_setting = [
-                                [34, 34],   # MUTUAL COOP
-                                [24, -6], # DECEIT
-                                [-6, 24], # DECEIT
-                                [0, 0]  # MUTUAL DECEIT
-                                ]
         self.rewards_list = []
         self.seed()
         self.reset()
@@ -47,7 +48,7 @@ class TdhEnv(gym.Env):
 
         self.game.append(actions)
         self.steps_counter += 1
-        self.observation = [actions[1], actions[0], self.steps_counter, 0] # 0 to bedzie kolor przeciwnika
+        self.observation = [actions[1], actions[0], self.steps_counter, rewards]
 
         if self.steps_counter == 19:
             player_zero = ""
@@ -66,7 +67,7 @@ class TdhEnv(gym.Env):
         self.steps_counter = -1
         self.game = []
         # self.done = 0
-        self.observation = [random.randint(0, 1), random.randint(0, 1), self.steps_counter, 0]
+        self.observation = [random.randint(0, 1), random.randint(0, 1), self.steps_counter, [0, 0]]
         return self.observation
 
     def _render(self, mode='human', **kwargs):
