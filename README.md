@@ -12,7 +12,7 @@ Requirements:
 Changelog:
 
 03.12
-- agents are DDPG instead of DQN now
+- using DDPG instead of DQN now
 - agents have parameters which impact their actions
 
 21.11
