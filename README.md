@@ -11,8 +11,12 @@ Requirements:
 
 Changelog:
 
+03.12
+- agents are DDPG instead of DQN now
+- agents have parameters which impact their actions
+
 21.11
-- agents now exist on 2d 43x43 plane and interact only when on the same tile
+- agents now exist on 2d 43x43 plane and interact when on the same tile
 - added visualisation done in pygame
 
 04.11
