@@ -11,6 +11,10 @@ Requirements:
 
 Changelog:
 
+10.12
+- using DQN instead of DDPG (DDPG can't handle TFT)
+- UI changes
+
 03.12
 - using DDPG instead of DQN now
 - agents have parameters which impact their actions
