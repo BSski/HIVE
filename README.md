@@ -1,13 +1,16 @@
 # HIVE
 Requirements:
-- keras_rl2==1.0.4
-- numpy==1.18.5
 - Keras==2.4.3
+- pandas==1.1.0
 - tensorflow==2.3.0
-- pygame==1.9.6
+- matplotlib==3.3.0
 - gym==0.17.2
+- pygame==1.9.6
+- numpy==1.18.5
+- keras_rl2==1.0.4
 - rl==3.0
 - theano==1.0.5
+
 
 Changelog:
 
