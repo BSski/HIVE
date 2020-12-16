@@ -15,7 +15,7 @@ Requirements:
 Changelog:
 
 10.12
-- using DQN instead of DDPG (DDPG can't handle TFT)
+- using DQN instead of DDPG (DDPG couldn't handle TFT)
 - UI changes
 
 03.12
