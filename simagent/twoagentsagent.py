@@ -53,9 +53,9 @@ class TwoAgentsAgent(object):
         """
         return {}
 
-    def fit(self, env, nb_steps, action_repetition=1, callbacks=None, verbose=1,
+    def fit(self, env, action_repetition=1, callbacks=None, verbose=1,
             visualize=False, nb_max_start_steps=0, start_step_policy=None, log_interval=10000,
-            nb_max_episode_steps=None):
+            nb_max_episode_steps=None, nb_agents_in_hives=[0,0,0,0,0,0,0,0,0]):
         """Trains the agent on the given environment.
         # Arguments
             env: (`Env` instance): Environment that the agent interacts with. See [Env](#env) for details.
@@ -108,7 +108,7 @@ class TwoAgentsAgent(object):
             callbacks._set_model(self)
         callbacks._set_env(env)
         params = {
-            'nb_steps': nb_steps,
+            'nb_steps': 1,
         }
         if hasattr(callbacks, 'set_params'):
             callbacks.set_params(params)
@@ -650,10 +650,10 @@ class TwoAgentsAgent(object):
                     carnivores_pos[pos_y][pos_x].append(1)
                     amount_left_to_spawn -= 1
 
-        # Spawn all the agents.
-        #for i in range(0, 2):
-        spawn_carnivore(12, 0)
-        spawn_carnivore(12, 8)
+        # Spawn agents.
+        for i in range(0,9):
+            spawn_carnivore(nb_agents_in_hives[i], i)
+
         want_rewards_visualisation = 0
         n = self.get_n()  # amount of agent types in the current simulation
         # ################################# #
