@@ -9,8 +9,8 @@ class RandomAgent(Agent):
     """
     def __init__(self):
         super(RandomAgent, self).__init__()
-        self.counter = -1
         self.compiled = False
+        self.step = 0
         # State.
         self.reset_states()
 
@@ -22,8 +22,15 @@ class RandomAgent(Agent):
         self.recent_observation = None
 
     def forward(self, observation):
+        # Set step number.
+        self.step = observation[1]
+
         # Select an action.
-        action = random.randint(0,1)
+        action = random.randint(0, 1)
+        if action == 0:
+            action = -1
+        else:
+            action = 1
 
         # Book-keeping.
         self.recent_observation = observation

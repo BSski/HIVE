@@ -9,8 +9,8 @@ class GRIMAgent(Agent):
     """
     def __init__(self):
         super(GRIMAgent, self).__init__()
-        self.counter = -1
         self.compiled = False
+        self.step = 0
         self.defected_flag = 0
         # State.
         self.reset_states()
@@ -23,19 +23,21 @@ class GRIMAgent(Agent):
         self.recent_observation = None
 
     def forward(self, observation):
+        # Set step number.
+        self.step = observation[1]
+
         # Select an action.
-        self.counter += 1
-        if self.counter > 0:
+        if self.step > -1:
             if observation[0] == 1:
                 self.defected_flag = 1
 
+
         if self.defected_flag == 0:
-            action = 0
+            action = -1
         else:
             action = 1
 
-        if self.counter == 20:
-            self.counter = -1
+        if self.step == 19:
             self.defected_flag = 0
 
         # Book-keeping.

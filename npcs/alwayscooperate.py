@@ -10,6 +10,7 @@ class AlwaysCooperateAgent(Agent):
     def __init__(self):
         super(AlwaysCooperateAgent, self).__init__()
         self.compiled = False
+        self.step = 0
         # State.
         self.reset_states()
 
@@ -21,8 +22,11 @@ class AlwaysCooperateAgent(Agent):
         self.recent_observation = None
 
     def forward(self, observation):
+        # Set step number.
+        self.step = observation[1]
+
         # Select an action.
-        action = 0
+        action = -1
 
         # Book-keeping.
         self.recent_observation = observation

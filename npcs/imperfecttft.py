@@ -9,8 +9,8 @@ class ImperfectTitForTatAgent(Agent):
     """
     def __init__(self):
         super(ImperfectTitForTatAgent, self).__init__()
-        self.counter = -1
         self.compiled = False
+        self.step = 0
         # State.
         self.reset_states()
 
@@ -22,22 +22,21 @@ class ImperfectTitForTatAgent(Agent):
         self.recent_observation = None
 
     def forward(self, observation):
-        # Select an action.
-        self.counter += 1
+        # Set step number.
+        self.step = observation[1]
 
-        if self.counter == 0:
-            action = 0
+        # Select an action.
+        if self.step == -1:
+            action = -1
         else:
             if random.randint(0, 100) > 10:
                 action = observation[0]
             else:
                 if observation[0] == 1:
-                    action = 0
+                    action = -1
                 if observation[0] == 0:
                     action = 1
 
-        if self.counter == 20:
-            self.counter = -1
 
         # Book-keeping.
         self.recent_observation = observation

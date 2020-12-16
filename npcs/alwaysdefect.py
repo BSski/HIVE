@@ -10,6 +10,7 @@ class AlwaysDefectAgent(Agent):
     def __init__(self):
         super(AlwaysDefectAgent, self).__init__()
         self.compiled = False
+        self.step = 0
         # State.
         self.reset_states()
 
@@ -21,6 +22,9 @@ class AlwaysDefectAgent(Agent):
         self.recent_observation = None
 
     def forward(self, observation):
+        # Set step number.
+        self.step = observation[1]
+        
         # Select an action.
         action = 1
 
