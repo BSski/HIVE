@@ -23,9 +23,17 @@ class SimultaneousAgent(TwoAgentsAgent):
         self.current_game_number = -1  # Used to append steps to proper games.
         self.current_game = [], []
         self.agents_games_log = []
+
+        # Creating list with proper structure.
         for i in range(self.n):
             self.agents_games_log.append([])
 
+        # Creating list with proper structure.
+        for i in range(self.n):
+            case = []
+            for j in range(self.n):
+                case.append([])
+            self.rewards_history.append(case)
 
     @property
     def training(self):
@@ -43,7 +51,7 @@ class SimultaneousAgent(TwoAgentsAgent):
 
     @step.setter
     def step(self,s):
-        #print "setting step %i" % s
+        # print "setting step %i" % s
         self._step = s
         for agent in self.agents:
             agent.step = s
@@ -82,8 +90,16 @@ class SimultaneousAgent(TwoAgentsAgent):
         print(observation[0], self.game_step, self.player_one, observation[3][1])
         print(observation[1], self.game_step, self.player, observation[3][0])
 
-        current_players_actions = [self.agents[self.player].forward([observation[0], self.game_step, self.player_one, observation[3][1]]),
-                                    self.agents[self.player_one].forward([observation[1], self.game_step, self.player, observation[3][0]])]
+        current_players_actions = [self.agents[self.player].forward([observation[0],
+                                                                     self.game_step,
+                                                                     self.player_one,
+                                                                     observation[3][1]
+                                                                     ]),
+                                   self.agents[self.player_one].forward([observation[1],
+                                                                         self.game_step,
+                                                                         self.player,
+                                                                         observation[3][0]
+                                                                         ])]
 
         if self.game_step != 19:
             self.current_game[0].append(current_players_actions[0])
@@ -101,12 +117,14 @@ class SimultaneousAgent(TwoAgentsAgent):
             List of metrics values
         """
         if self.game_step == 19:
-            self.agents_games_log[self.player].append([self.current_game[0], self.current_game[1]])
-            self.agents_games_log[self.player_one].append([self.current_game[1], self.current_game[0]])
+            self.agents_games_log[self.player].append([self.current_game[0],
+                                                       self.current_game[1]])
+            self.agents_games_log[self.player_one].append([self.current_game[1],
+                                                           self.current_game[0]])
             self.current_game = [], []
 
-        return [self.agents[self.player].backward(reward[0],terminal),
-                self.agents[self.player_one].backward(reward[1],terminal)]
+        return [self.agents[self.player].backward(reward[0], terminal),
+                self.agents[self.player_one].backward(reward[1], terminal)]
 
     def compile(self, optimizer, metrics=[]):
         """Compiles an agent and the underlaying models to be used for training and testing.
@@ -118,7 +136,6 @@ class SimultaneousAgent(TwoAgentsAgent):
         for i,agent in enumerate(self.agents):
             if not agent.compiled:
                 agent.compile(optimizer[i],metrics[i])
-
 
         # Create agents combinations.
         combinations = []
@@ -134,7 +151,6 @@ class SimultaneousAgent(TwoAgentsAgent):
         for i in range(len(combinations)):
             if i % 2 == 0:
                 self.agents_combinations.append(combinations[i])
-
 
         # Add each agent's metrics names to self.m_names.
         for i in range(len(self.agents)):
@@ -208,24 +224,43 @@ class SimultaneousAgent(TwoAgentsAgent):
             agent._on_test_end()
 
 
-    def get_fights_list(self):
+    def get_agents_games_log(self):
         return self.agents_games_log
 
     def get_n(self):
         return self.n
 
-    def forward_test(self, observation, x, y):
-        self.player = x
-        self.player_one = y
+    def forward_test(self, observation, player0, player1, agent_index, agent_one_index):
+        self.player = player0
+        self.player_one = player1
         self.game_step = observation[2]
+
         if self.game_step == -1:
-            print("####### AGENTS PLAYING:", x, y)
+            print("####### HIVES PLAYING:", self.player, self.player_one)
+            print("####### AGENTS PLAYING:", agent_index, agent_one_index)
 
             if self.current_fight_number == 0:
                 self.current_game_number += 1
-        current_players_actions = [self.agents[x].forward([observation[0], self.game_step, y, observation[3][1]]),
-                                    self.agents[y].forward([observation[1], self.game_step, x, observation[3][0]])]
+        print(observation)
+
+        # [my_action, game_step, enemy_hive, enemy_reward, my_agent]
+        current_players_actions = [self.agents[self.player].forward([observation[0],
+                                                                     self.game_step,
+                                                                     self.player_one,
+                                                                     observation[3][1],
+                                                                     agent_index,
+                                                                     agent_one_index
+                                                                     ]),
+                                   self.agents[self.player_one].forward([observation[1],
+                                                                         self.game_step,
+                                                                         self.player,
+                                                                         observation[3][0],
+                                                                         agent_one_index,
+                                                                         agent_index
+                                                                         ])]
+
         return current_players_actions
+
 
     def backward_test(self, reward, terminal):
         """Updates the agent after having executed the action returned by `forward`.
@@ -237,9 +272,14 @@ class SimultaneousAgent(TwoAgentsAgent):
             List of metrics values
         """
         if self.game_step == 19:
-            self.agents_games_log[self.player].append([self.current_game[0], self.current_game[1]])
-            self.agents_games_log[self.player_one].append([self.current_game[1], self.current_game[0]])
+            self.agents_games_log[self.player].append([self.current_game[0],
+                                                       self.current_game[1]])
+            self.agents_games_log[self.player_one].append([self.current_game[1],
+                                                           self.current_game[0]])
             self.current_game = [], []
 
         return [self.agents[self.player].backward(reward[0],terminal),
                 self.agents[self.player_one].backward(reward[1],terminal)]
+
+    def get_rewards_history(self):
+        return self.rewards_history

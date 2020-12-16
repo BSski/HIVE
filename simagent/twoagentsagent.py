@@ -3,6 +3,7 @@ import warnings
 from copy import deepcopy
 
 import numpy as np
+import matplotlib.pyplot as pp
 from keras.callbacks import History
 
 from callbacks import (
@@ -17,7 +18,6 @@ import pygame
 import random
 from grid import grid
 from positions import *
-
 
 
 class TwoAgentsAgent(object):
@@ -44,15 +44,7 @@ class TwoAgentsAgent(object):
         self.training = False
         self.step = 0
 
-        """
-        size = (1061, 670)
-        pygame.display.set_caption("HIVE")
-        screen = pygame.display.set_mode(size)
-        pygame.draw.rect(screen, (100,100,100), [50, 60, 162, 105])
-        screen.fill((0,0,0))
-        clock = pygame.time.Clock()
-        clock.tick(15)
-        pygame.display.flip()"""
+        self.rewards_history = []
 
     def get_config(self):
         """Configuration of the agent for serialization.
@@ -125,6 +117,7 @@ class TwoAgentsAgent(object):
         self._on_train_begin()
         callbacks.on_train_begin()
 
+        ##########################################################################
         episode = np.int16(0)
         self.step = np.int16(0)
         observation = None
@@ -132,61 +125,48 @@ class TwoAgentsAgent(object):
         episode_step = None
         did_abort = False
 
+        hives_balance_against = [
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
+        ]
 
         pygame.init()
-        size = (1061, 670)
+        size = (860, 670)
         pygame.display.set_caption("HIVE")
         screen = pygame.display.set_mode(size)
+        hive_icon = pygame.image.load('sprites/hive.png')
+        pygame.display.set_icon(hive_icon)
         # Set the main loop to not done and initialize a clock.
         pygame_done = False
         clock = pygame.time.Clock()
 
-
-##########################################################################
+        ##########################################################################
         def fight(self, env, action_repetition, callbacks, nb_max_start_steps, start_step_policy,
-        nb_max_episode_steps, episode_reward, episode_step, observation, episode, did_abort, player = None, player_one = None):
+        nb_max_episode_steps, episode_reward, episode_step, observation, episode, did_abort, player = None, player_one = None, agent_index = None, agent_one_index = None, parameters = [], parameters_one = []):
             try:
-                #while self.step < nb_steps:
+                print(player, player_one, parameters, parameters_one)
                 for i_step in range(20):
                     if observation is None:  # start of a new episode
                         callbacks.on_episode_begin(episode)
                         episode_step = np.int16(0)
-                        episode_reward = [0, 0] # ZMIANA #
+                        episode_reward = [0, 0]
 
                         # Obtain the initial observation by resetting the environment.
                         self.reset_states()
                         observation = deepcopy(env.reset())
-                        if self.processor is not None:
-                            observation = self.processor.process_observation(
-                                observation)
+                        # if self.processor is not None:
+                            # observation = self.processor.process_observation(
+                                # observation)
                         assert observation is not None
 
-                        # Perform random starts at beginning of episode and do not record them into the experience.
-                        # This slightly changes the start position between games.
-                        nb_random_start_steps = 0 if nb_max_start_steps == 0 else np.random.randint(
-                            nb_max_start_steps)
-                        for _ in range(nb_random_start_steps):
-                            if start_step_policy is None:
-                                action = env.action_space.sample()
-                            else:
-                                action = start_step_policy(observation)
-                            if self.processor is not None:
-                                action = self.processor.process_action(action)
-                            callbacks.on_action_begin(action)
-                            observation, reward, done, info = env.step(action)
-                            observation = deepcopy(observation)
-                            if self.processor is not None:
-                                observation, reward, done, info = self.processor.process_step(
-                                    observation, reward, done, info)
-                            callbacks.on_action_end(action)
-                            if done:
-                                warnings.warn('Env ended before {} random steps could be performed at the start. You should probably lower the `nb_max_start_steps` parameter.'.format(
-                                    nb_random_start_steps))
-                                observation = deepcopy(env.reset())
-                                if self.processor is not None:
-                                    observation = self.processor.process_observation(
-                                        observation)
-                                break
+                    # nb_random_start_steps loop was there, but it's gone now, since I'm doing that in env #
 
                     # At this point, we expect to be fully initialized.
                     assert episode_reward is not None
@@ -197,20 +177,31 @@ class TwoAgentsAgent(object):
                     callbacks.on_step_begin(episode_step)
                     # This is where all of the work happens. We first perceive and compute the action
                     # (forward step) and then use the reward to improve (backward step).
-                    action = self.forward_test(observation, player, player_one)
-                    if self.processor is not None:
-                        action = self.processor.process_action(action)
+                    action = self.forward_test(observation,
+                                               player,
+                                               player_one,
+                                               agent_index,
+                                               agent_one_index
+                                               )
+                    # if self.processor is not None:
+                        # action = self.processor.process_action(action)
 
-                    reward = [0, 0] # ZMIANA #
+                    # Parameters impact.
+                    print("actions before parameters:", action)
+                    #action[0] = (action[0] + (0.05 * parameters[0]))*(1-(parameters[1]*0.05))
+                    #action[1] = (action[1] + (0.05 * parameters_one[0]))*(1-(parameters_one[1]*0.05))
+
+
+                    reward = [0, 0]
                     accumulated_info = {}
                     done = False
                     for _ in range(action_repetition):
                         callbacks.on_action_begin(action)
                         observation, r, done, info = env.step(action)
                         observation = deepcopy(observation)
-                        if self.processor is not None:
-                            observation, r, done, info = self.processor.process_step(
-                                observation, r, done, info)
+                        # if self.processor is not None:
+                            # observation, r, done, info = self.processor.process_step(
+                                # observation, r, done, info)
                         for key, value in info.items():
                             if not np.isreal(value):
                                 continue
@@ -223,15 +214,11 @@ class TwoAgentsAgent(object):
 
                         if done:
                             break
-                    if nb_max_episode_steps and episode_step >= nb_max_episode_steps - 1:
-                        # Force a terminal state.
-                        done = True
 
-                    metrics, metrics1 = self.backward(reward, terminal=done)
+                    # nb_max_episode_steps was there, but it's gone now, since I'm doing that in env #
 
-                    # ZMIANA #
+                    metrics, metrics1 = self.backward_test(reward, terminal=done)
 
-                    #episode_reward.append([reward[0][0], reward[0][1]])
                     episode_reward[0] += reward[0]
                     episode_reward[1] += reward[1]
                     print("### episode_reward", episode_reward)
@@ -256,8 +243,13 @@ class TwoAgentsAgent(object):
                         # resetting the environment. We need to pass in `terminal=False` here since
                         # the *next* state, that is the state of the newly reset environment, is
                         # always non-terminal by convention.
-                        self.forward_test(observation, player, player_one)
-                        self.backward([0, 0], terminal=False)
+                        self.forward_test(observation,
+                                          player,
+                                          player_one,
+                                          agent_index,
+                                          agent_one_index
+                                          )
+                        self.backward_test([0, 0], terminal=False)
 
                         # This episode is finished, report and reset.
                         episode_logs = {
@@ -270,7 +262,6 @@ class TwoAgentsAgent(object):
                         episode += 1
                         observation = None
                         episode_step = None
-                        episode_reward = None
             except KeyboardInterrupt:
                 # We catch keyboard interrupts here so that training can be be safely aborted.
                 # This is so common that we've built this right into this function, which ensures that
@@ -291,28 +282,7 @@ class TwoAgentsAgent(object):
         font6 = pygame.font.SysFont("liberationmono", 14)
         font7 = pygame.font.SysFont("liberationmono", 18)
 
-        # Define colors.
-        colors_list_red = [
-        [(255, 173, 153), (255, 153, 128), (255, 133, 102), (255, 112, 77), (255, 92, 51), (255, 71, 26), (255, 51, 0), (230, 46, 0)],            # RED 1
-        [(255, 194, 153), (255, 179, 128), (255, 163, 102), (255, 148, 77), (255, 133, 51), (255, 117, 26), (255, 102, 0), (230, 92, 0)],         # RED 2
-        [(255, 153, 153), (255, 128, 128), (255, 102, 102), (255, 77, 77), (255, 51, 51), (255, 26, 26), (255, 0, 0), (230, 0, 0)],               # RED 3
-        [(255, 153, 187), (255, 128, 170), (255, 102, 153), (255, 77, 136), (255, 51, 119), (255, 26, 102), (255, 0, 85), (230, 0, 76)],          # RED 4
-        [(255, 173, 153), (255, 153, 128), (255, 133, 102), (255, 112, 77), (255, 92, 51), (255, 71, 26), (255, 51, 0), (230, 46, 0)],            # RED 1
-        [(255, 194, 153), (255, 179, 128), (255, 163, 102), (255, 148, 77), (255, 133, 51), (255, 117, 26), (255, 102, 0), (230, 92, 0)],         # RED 2
-        [(255, 153, 153), (255, 128, 128), (255, 102, 102), (255, 77, 77), (255, 51, 51), (255, 26, 26), (255, 0, 0), (230, 0, 0)],               # RED 3
-        [(255, 153, 187), (255, 128, 170), (255, 102, 153), (255, 77, 136), (255, 51, 119), (255, 26, 102), (255, 0, 85), (230, 0, 76)]           # RED 4
-        ]
-        colors_list_green = [
-        [(77, 255, 136), (51, 255, 119), (26, 255, 102), (0, 255, 85), (0, 230, 77), (0, 204, 68), (0, 179, 60), (0, 153, 51), (0, 128, 43)],     # GREEN 1
-        [(77, 255, 77), (51, 255, 51), (26, 255, 26), (153,50,204), (0, 230, 0), (0, 204, 0), (0, 179, 0), (153,0,204), (0, 128, 0)],              # PURPLE
-        [(51, 255, 153), (26, 255, 140), (0, 255, 128), (0, 230, 115), (0, 204, 102), (0, 179, 89), (0, 153, 77), (0, 128, 64)],                  # GREEN 3
-        [(51, 255, 204), (26, 255, 198), (0, 255, 191), (0, 230, 172), (0, 204, 153), (0, 179, 134), (0, 153, 115), (0, 128, 96)],                # GREEN 4
-        [(77, 255, 136), (51, 255, 119), (26, 255, 102), (0, 255, 85), (0, 230, 77), (0, 204, 68), (0, 179, 60), (0, 153, 51), (0, 128, 43)],     # GREEN 1
-        [(77, 255, 77), (51, 255, 51), (26, 255, 26), (0, 255, 0), (0, 230, 0), (0, 204, 0), (0, 179, 0), (0, 153, 0), (0, 128, 0)],              # GREEN 2
-        [(51, 255, 153), (26, 255, 140), (0, 255, 128), (0, 230, 115), (0, 204, 102), (0, 179, 89), (0, 153, 77), (0, 128, 64)],                  # GREEN 3
-        [(51, 255, 204), (26, 255, 198), (0, 255, 191), (0, 230, 172), (0, 204, 153), (0, 179, 134), (0, 153, 115), (0, 128, 96)]                 # GREEN 4
-        ]
-
+        # Defining colors.
         BLACK       = (   0,   0,   0)
         WHITE       = ( 255, 255, 255)
         GRAY        = ( 210, 210, 210)
@@ -338,9 +308,6 @@ class TwoAgentsAgent(object):
         START_DOWN = pygame.image.load("sprites/START_DOWN.png")
         PAUSE_UP = pygame.image.load("sprites/PAUSE_UP.png")
         PAUSE_DOWN = pygame.image.load("sprites/PAUSE_DOWN.png")
-        RIGHT_PANEL_BUTTONS1 = pygame.image.load("sprites/RIGHT_PANEL_BUTTONS1.png")
-        RIGHT_PANEL_BUTTONS2 = pygame.image.load("sprites/RIGHT_PANEL_BUTTONS2.png")
-        RIGHT_PANEL_BUTTONS3 = pygame.image.load("sprites/RIGHT_PANEL_BUTTONS3.png")
 
         animation = "|/-\\"
 
@@ -366,9 +333,11 @@ class TwoAgentsAgent(object):
         fight_flag = 0
 
         def draw_window():
+            logo = font4.render("H I V E", True, (80, 80, 80))
+            screen.blit(logo, (28, 18))
             signature = font3.render("bsski 2020", True, (200, 200, 200))
             screen.blit(signature, (70, 60))
-
+            """
             # Drawing grid.
             square = 10
             square_width = square
@@ -380,131 +349,168 @@ class TwoAgentsAgent(object):
                 for j in range(0, grid_size):
                     x += square_width
                     pygame.draw.rect(screen, GRAY, [x, y, square_width-1, square_height-1])
-
+            """
             # Charts backgrounds.
-            pygame.draw.rect(screen, WHITE, [29, 124, 162, 300])
-            pygame.draw.rect(screen, GRAY, [860, 44, 176, 6])
-            pygame.draw.rect(screen, GRAY, [850, 50, 196, 609])
-            #if bigger_screen == 1:
-            pygame.draw.rect(screen, WHITE, [37, 459, 801, 191])
+            # pygame.draw.rect(screen, GRAY, [860, 44, 176, 6])
+
+            # Single hex
+            x = 213
+            y = 9
+            radius = 45
+            for j in range((int(radius/2)+1),(radius*2)-1):
+                if j > radius:
+                    if radius - (j-radius) < int(radius/2)+1:
+                        break
+                    else:
+                        row_quantity = radius - (j-radius)
+                else:
+                    row_quantity = j
+                for i in range(0, row_quantity):
+                    shift = int((radius - row_quantity)/2)-1
+                    if j % 2 == 0:
+                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1), (x+4+2+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1), 1)
+                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+1), (x+6+1+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+1), 1)
+                        pygame.draw.rect(screen, GRAY, [x+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)+1, 9, 5])
+                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+7), (x+6+1+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+7), 1)
+                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+8), (x+4+2+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+8), 1)
+                    else:
+                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1), (x+4+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1), 1)
+                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+1), (x+6+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+1), 1)
+                        pygame.draw.rect(screen, GRAY, [x+(10*i)+(shift*10), y+((j-int(radius/2))*9)+1, 9, 5])
+                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+7), (x+6+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+7), 1)
+                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+8), (x+4+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+8), 1)
+
 
             # Main interface lines.
             pygame.draw.line(screen, GRAY, (12, 12), (12, 657), 1)
             pygame.draw.line(screen, GRAY, (198, 12), (198, 436), 1)
             pygame.draw.line(screen, GRAY, (656, 12), (656, 436), 1)
             pygame.draw.line(screen, GRAY, (847, 12), (847, 657), 1)
-            pygame.draw.line(screen, GRAY, (1048, 12), (1048, 646), 1)
 
-            # Amounts chart.
-            pygame.draw.line(screen, GRAY, (28, 423), (189, 423), 1)
-            pygame.draw.line(screen, GRAY, (28, 413), (189, 413), 1)
-            pygame.draw.line(screen, GRAY, (28, 403), (189, 403), 1)
-            pygame.draw.line(screen, GRAY, (28, 393), (189, 393), 1)
-            pygame.draw.line(screen, GRAY, (28, 383), (189, 383), 1)
-            pygame.draw.line(screen, GRAY, (28, 373), (189, 373), 1)
-            pygame.draw.line(screen, GRAY, (28, 363), (189, 363), 1)
-            pygame.draw.line(screen, GRAY, (28, 353), (189, 353), 1)
-            pygame.draw.line(screen, GRAY, (28, 343), (189, 343), 1)
-            pygame.draw.line(screen, GRAY, (28, 333), (189, 333), 1)
-            pygame.draw.line(screen, GRAY, (28, 323), (189, 323), 1)
-            pygame.draw.line(screen, GRAY, (28, 313), (189, 313), 1)
-            pygame.draw.line(screen, GRAY, (28, 303), (189, 303), 1)
-            pygame.draw.line(screen, GRAY, (28, 293), (189, 293), 1)
-            pygame.draw.line(screen, GRAY, (28, 283), (189, 283), 1)
-            pygame.draw.line(screen, GRAY, (28, 273), (189, 273), 1)
-            pygame.draw.line(screen, GRAY, (28, 263), (189, 263), 1)
-            pygame.draw.line(screen, GRAY, (28, 253), (189, 253), 1)
-            pygame.draw.line(screen, DARKRED, (28, 243), (189, 243), 1)
-            pygame.draw.line(screen, GRAY, (28, 233), (189, 233), 1)
-            pygame.draw.line(screen, GRAY, (28, 223), (189, 223), 1)
-            pygame.draw.line(screen, GRAY, (28, 213), (189, 213), 1)
-            pygame.draw.line(screen, GRAY, (28, 203), (189, 203), 1)
-            pygame.draw.line(screen, GRAY, (28, 193), (189, 193), 1)
-            pygame.draw.line(screen, GRAY, (28, 183), (189, 183), 1)
-            pygame.draw.line(screen, GRAY, (28, 173), (189, 173), 1)
-            pygame.draw.line(screen, GRAY, (28, 163), (189, 163), 1)
-            pygame.draw.line(screen, GRAY, (28, 153), (189, 153), 1)
-            pygame.draw.line(screen, GRAY, (28, 143), (189, 143), 1)
-            pygame.draw.line(screen, GRAY, (28, 133), (189, 133), 1)
-            pygame.draw.line(screen, GRAY, (28, 123), (189, 123), 1)
-            pygame.draw.line(screen, DARKGRAY, (28, 424), (28, 122), 1)
-            pygame.draw.line(screen, DARKGRAY, (28, 424), (189, 424), 1)
-            pygame.draw.line(screen, DARKGRAY, (28, 122), (189, 122), 1)
-            pygame.draw.line(screen, DARKGRAY, (190, 424), (190, 122), 1)
-            text_to_blit = font5.render("0", True, (50, 50, 50))
-            screen.blit(text_to_blit, (18, 417))
-            text_to_blit = font5.render(".1", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 397))
-            text_to_blit = font5.render(".2", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 377))
-            text_to_blit = font5.render(".3", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 357))
-            text_to_blit = font5.render(".4", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 337))
-            text_to_blit = font5.render(".5", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 317))
-            text_to_blit = font5.render(".6", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 297))
-            text_to_blit = font5.render(".7", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 277))
-            text_to_blit = font5.render(".8", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 257))
-            text_to_blit = font5.render(".9", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 237))
-            text_to_blit = font5.render("1", True, (50, 50, 50))
-            screen.blit(text_to_blit, (17, 217))
-            text_to_blit = font5.render(".1", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 197))
-            text_to_blit = font5.render(".2", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 177))
-            text_to_blit = font5.render(".3", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 157))
-            text_to_blit = font5.render(".4", True, (50, 50, 50))
-            screen.blit(text_to_blit, (12, 137))
-            text_to_blit = font5.render("k", True, (50, 50, 50))
-            screen.blit(text_to_blit, (18, 117))
+            icons_div = 88
+            # Hive 1 icon.
+            pygame.draw.rect(screen, ( 255, 255, 255), [19 , (icons_div+15*0), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*0)-1, 11, 11], 1)
+            # Hive 2 icon.
+            pygame.draw.rect(screen, ( 255,   0,   0), [19, (icons_div+15*1), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*1)-1, 11, 11], 1)
+            # Hive 3 icon.
+            pygame.draw.rect(screen, (   0, 255,   0), [19, (icons_div+15*2), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*2)-1, 11, 11], 1)
+            # Hive 4 icon.
+            pygame.draw.rect(screen, (   0,   0, 255), [19, (icons_div+15*3), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*3)-1, 11, 11], 1)
+            # Hive 5 icon.
+            pygame.draw.rect(screen, ( 255, 255,   0), [19, (icons_div+15*4), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*4)-1, 11, 11], 1)
+            # Hive 6 icon.
+            pygame.draw.rect(screen, (   0, 255, 255), [19, (icons_div+15*5), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*5)-1, 11, 11], 1)
+            # Hive 7 icon.
+            pygame.draw.rect(screen, ( 255,   0, 255), [19, (icons_div+15*6), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*6)-1, 11, 11], 1)
+            # Hive 8 icon.
+            pygame.draw.rect(screen, ( 128, 128,   0), [19, (icons_div+15*7), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*7)-1, 11, 11], 1)
+            # Hive 9 icon.
+            pygame.draw.rect(screen, (   0, 128,   0), [19, (icons_div+15*8), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*8)-1, 11, 11], 1)
 
-            # All amount history chart.
-            #if bigger_screen == 1:
-            pygame.draw.line(screen, GRAY, (37, 649), (837, 649), 1)
-            pygame.draw.line(screen, GRAY, (37, 639), (837, 639), 1)
-            pygame.draw.line(screen, GRAY, (37, 629), (837, 629), 1)
-            pygame.draw.line(screen, GRAY, (37, 619), (837, 619), 1)
-            pygame.draw.line(screen, GRAY, (37, 609), (837, 609), 1)
-            pygame.draw.line(screen, GRAY, (37, 599), (837, 599), 1)
-            pygame.draw.line(screen, GRAY, (37, 589), (837, 589), 1)
-            pygame.draw.line(screen, GRAY, (37, 579), (837, 579), 1)
-            pygame.draw.line(screen, GRAY, (37, 569), (837, 569), 1)
-            pygame.draw.line(screen, GRAY, (37, 559), (837, 559), 1)
-            pygame.draw.line(screen, GRAY, (37, 549), (837, 549), 1)
-            pygame.draw.line(screen, GRAY, (37, 539), (837, 539), 1)
-            pygame.draw.line(screen, GRAY, (37, 529), (837, 529), 1)
-            pygame.draw.line(screen, GRAY, (37, 519), (837, 519), 1)
-            pygame.draw.line(screen, GRAY, (37, 509), (837, 509), 1)
-            pygame.draw.line(screen, GRAY, (37, 499), (837, 499), 1)
-            pygame.draw.line(screen, GRAY, (37, 489), (837, 489), 1)
-            pygame.draw.line(screen, GRAY, (37, 479), (837, 479), 1)
-            pygame.draw.line(screen, DARKRED, (37, 469), (837, 469), 1)
-            pygame.draw.line(screen, GRAY, (37, 459), (837, 459), 1)
-            pygame.draw.line(screen, DARKGRAY, (36, 649+1), (36, 459-1), 1)
-            pygame.draw.line(screen, DARKGRAY, (36, 649+1), (837, 649+1), 1)
-            pygame.draw.line(screen, DARKGRAY, (36, 459-1), (837, 459-1), 1)
-            pygame.draw.line(screen, DARKGRAY, (838, 649+1), (838, 459-1), 1)
-            text_to_blit = font2.render("TOTAL AMOUNT LOG", True, (50, 50, 50))
-            screen.blit(text_to_blit, (370, 653))
 
-            # Herbs icon.
-            pygame.draw.circle(screen, FORESTGREEN, [711, 22], 3, 0)
-            # Herbivores icon.
-            pygame.draw.rect(screen, colors_list_green[7][7], [684 , 33, 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [684-1, 33-1, 11, 11], 1)
-            # Carnivores icon.
-            pygame.draw.rect(screen, colors_list_red[7][7], [684, 48, 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [684-1, 48-1, 11, 11], 1)
+            text_to_blit = font2.render("HIVE 1 BALANCE AGAINST: ", True, (50, 50, 50))
+            screen.blit(text_to_blit, (664, 3 + 13*1))
+            text_to_blit = font2.render(("HIVE 1: " + "-"), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 3 + 13*2))
+            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[0][1])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 3 + 13*3))
+            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[0][2])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 3 + 13*4))
+            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[0][3])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 3 + 13*5))
+            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[0][4])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 3 + 13*6))
+            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[0][5])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 3 + 13*7))
 
+            text_to_blit = font2.render("HIVE 2 BALANCE AGAINST: ", True, (50, 50, 50))
+            screen.blit(text_to_blit, (664, 103 + 13*1))
+            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[1][0])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 103 + 13*2))
+            text_to_blit = font2.render(("HIVE 2: " + "-"), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 103 + 13*3))
+            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[1][2])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 103 + 13*4))
+            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[1][3])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 103 + 13*5))
+            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[1][4])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 103 + 13*6))
+            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[1][5])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 103 + 13*7))
+
+            text_to_blit = font2.render("HIVE 3 BALANCE AGAINST: ", True, (50, 50, 50))
+            screen.blit(text_to_blit, (664, 203 + 13*1))
+            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[2][0])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 203 + 13*2))
+            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[2][1])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 203 + 13*3))
+            text_to_blit = font2.render(("HIVE 3: " + "-"), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 203 + 13*4))
+            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[2][3])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 203 + 13*5))
+            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[2][4])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 203 + 13*6))
+            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[2][5])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 203 + 13*7))
+
+            text_to_blit = font2.render("HIVE 4 BALANCE AGAINST: ", True, (50, 50, 50))
+            screen.blit(text_to_blit, (664, 303 + 13*1))
+            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[3][0])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 303 + 13*2))
+            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[3][1])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 303 + 13*3))
+            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[3][2])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 303 + 13*4))
+            text_to_blit = font2.render(("HIVE 4: " + "-"), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 303 + 13*5))
+            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[3][4])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 303 + 13*6))
+            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[3][5])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 303 + 13*7))
+
+
+            text_to_blit = font2.render("HIVE 5 BALANCE AGAINST: ", True, (50, 50, 50))
+            screen.blit(text_to_blit, (664, 403 + 13*1))
+            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[4][0])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 403 + 13*2))
+            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[4][1])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 403 + 13*3))
+            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[4][2])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 403 + 13*4))
+            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[4][3])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 403 + 13*5))
+            text_to_blit = font2.render(("HIVE 5: " + "-"), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 403 + 13*6))
+            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[4][5])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 403 + 13*7))
+
+
+            text_to_blit = font2.render("HIVE 6 BALANCE AGAINST: ", True, (50, 50, 50))
+            screen.blit(text_to_blit, (664, 503 + 13*1))
+            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[5][0])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 503 + 13*2))
+            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[5][1])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 503 + 13*3))
+            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[5][2])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 503 + 13*4))
+            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[5][3])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 503 + 13*5))
+            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[5][4])), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 503 + 13*6))
+            text_to_blit = font2.render(("HIVE 6: " + "-"), True, (50, 50, 50))
+            screen.blit(text_to_blit, (674, 503 + 13*7))
 
         # Class creating animals.
-        class animal:
+        class Animal:
             def __init__(self, coord_x, coord_y, index, dna):
                 pass
 
@@ -528,27 +534,41 @@ class TwoAgentsAgent(object):
                 return (self.coord_x, self.coord_y)
 
         # Class creating carnivores.
-        class Carnivore(animal):
-            def __init__(self, coord_x, coord_y, index, hive):
+        class Carnivore(Animal):
+            def __init__(self, coord_x, coord_y, index, hive, parameters):
                 self.coord_x = coord_x
                 self.coord_y = coord_y
+                self.account = 5000
                 self.index = index
                 self.hive = hive
+                self.parameters = parameters
                 self.colors_dict = {
-                0: (255,255,255),
-                1:(255,0,0),
-                2:(0,255,0),
-                3:(0,0,255),
-                4:(255,255,0),
-                5:(0,255,255),
-                6:(255,0,255),
-                7:(128,128,0),
-                8:(0,128,0)
+                0 : (255, 255, 255),
+                1 : (255,   0,   0),
+                2 : (  0, 255,   0),
+                3 : (  0,   0, 255),
+                4 : (255, 255,   0),
+                5 : (  0, 255, 255),
+                6 : (255,   0, 255),
+                7 : (128, 128,   0),
+                8 : (  0, 128,   0)
+                }
+                self.balance_against = {
+                0 : 0,
+                1 : 0,
+                2 : 0,
+                3 : 0,
+                4 : 0,
+                5 : 0,
+                6 : 0,
+                7 : 0,
+                8 : 0
                 }
                 self.color = 0
                 self.forbidden_move = random.choice(("e", "w", "s", "n"))
                 self.possible_moves = ["e", "w", "s", "n"]
 
+            # Draw the animal on the screen.
             def draw(self):
                 pygame.draw.rect(screen, self.colors_dict[self.hive],
                                      [grid[self.coord_y][self.coord_x][0]+1,
@@ -558,6 +578,7 @@ class TwoAgentsAgent(object):
                                  [grid[self.coord_y][self.coord_x][0],
                                   grid[self.coord_y][self.coord_x][1], 9, 9], 1)
 
+            # Move the animal in the positions list and change its coordinates.
             def move(self):
                 if int(counter_prev) != int(counter):
                     if int(counter) % 4 == 0:  # self.speed
@@ -569,7 +590,7 @@ class TwoAgentsAgent(object):
                                 self.coord_y == 0 or
                                 self.coord_y == grid_size-1):
                                 # If all conditions satisfied:
-                            self.possible_moves.remove(self.forbidden_move) # hash it if you want random movement
+                            self.possible_moves.remove(self.forbidden_move)  # hash it if you want random movement
                             move = random.choice(self.possible_moves)
                             if move == "e":
                                 self.coord_x += 1
@@ -599,7 +620,6 @@ class TwoAgentsAgent(object):
                         self.possible_moves = ["e", "w", "s", "n"]
                         carnivores_pos[self.coord_y][self.coord_x].append(1)
 
-
         # Spawn a new carnivore.
         def spawn_carnivore(amount, hive):
             amount_left_to_spawn = amount
@@ -607,13 +627,35 @@ class TwoAgentsAgent(object):
                 pos_y = random.randint(1, grid_size-2)
                 pos_x = random.randint(1, grid_size-2)
                 if len(carnivores_pos[pos_y][pos_x]) < 1:
-                    carnivores.append(Carnivore(pos_x, pos_y, len(carnivores), hive))
+                    carnivores.append(Carnivore(pos_x, pos_y, len(carnivores), hive, [
+                                                      random.randint(-3,3),
+                                                      random.randint(-3,3),
+                                                      random.randint(-3,3),
+                                                      random.randint(-3,3)]))
                     carnivores_pos[pos_y][pos_x].append(1)
                     amount_left_to_spawn -= 1
 
-        for i in range(0,8):
-            spawn_carnivore(4,i)
+        # Spawn a new carnivore but with different parameters setting.
+        def spawn_barnivore(amount, hive):
+            amount_left_to_spawn = amount
+            while amount_left_to_spawn != 0:
+                pos_y = random.randint(1, grid_size-2)
+                pos_x = random.randint(1, grid_size-2)
+                if len(carnivores_pos[pos_y][pos_x]) < 1:
+                    carnivores.append(Carnivore(pos_x, pos_y, len(carnivores), hive, [
+                                                      random.randint(0,1),
+                                                      random.randint(0,1),
+                                                      random.randint(0,1),
+                                                      random.randint(0,1)]))
+                    carnivores_pos[pos_y][pos_x].append(1)
+                    amount_left_to_spawn -= 1
 
+        # Spawn all the agents.
+        #for i in range(0, 2):
+        spawn_carnivore(12, 0)
+        spawn_carnivore(12, 8)
+        want_rewards_visualisation = 0
+        n = self.get_n()  # amount of agent types in the current simulation
         # ################################# #
         # ##-------- PYGAME LOOP --------## #
         # ################################# #
@@ -626,7 +668,6 @@ class TwoAgentsAgent(object):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame_done = True
-
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         if pause == 1:
@@ -634,11 +675,7 @@ class TwoAgentsAgent(object):
                         else:
                             pause = 1
                     if event.key == pygame.K_LEFT:
-                        if not pause:
-
-                            fights_queue.append([0, 3])
-                            print(fights_queue)
-                            fight_flag = 1
+                        want_rewards_visualisation = 1
 
             # Increase /counter/ with a step of a size of /tempo/ every frame,
             # if simulation isn't paused. If /counter/ is bigger than 120,
@@ -660,10 +697,32 @@ class TwoAgentsAgent(object):
             # Play all the games that are in the fights_queue
             if not pause:
                 if fight_flag == 1:
-                    print(fights_queue)
+                    #print(fights_queue)
                     for i in range(len(fights_queue)):
-                        episode_reward, episode_step, observation, episode, did_abort = fight(self, env, action_repetition, callbacks, nb_max_start_steps, start_step_policy,
-                        nb_max_episode_steps, episode_reward, episode_step, observation, episode, did_abort, fights_queue[i][0], fights_queue[i][1])
+                        episode_reward, episode_step, observation, episode, did_abort = fight(self, env, action_repetition, callbacks, nb_max_start_steps,
+                        start_step_policy, nb_max_episode_steps, episode_reward, episode_step, observation, episode, did_abort,
+                        fights_queue[i][0], fights_queue[i][1], fights_queue[i][2], fights_queue[i][3], fights_queue[i][4], fights_queue[i][5])
+                        print("baba", episode_reward)
+                        print("account before:", carnivores[fights_queue[i][2]].account, "::", fights_queue[i][2])
+                        carnivores[fights_queue[i][2]].account += episode_reward[0]
+                        print("account after:", carnivores[fights_queue[i][2]].account, "::", fights_queue[i][2])
+                        print("account1 before:", carnivores[fights_queue[i][3]].account, "::", fights_queue[i][3])
+                        carnivores[fights_queue[i][3]].account += episode_reward[1]
+                        print("account1 after:", carnivores[fights_queue[i][3]].account, "::", fights_queue[i][3])
+                        print("######################################################################")
+                        print("######################################################################")
+
+                        # Adding episode rewards to rewards_history.
+                        if fights_queue[i][0] == fights_queue[i][1]:
+                            self.rewards_history[fights_queue[i][0]][fights_queue[i][1]].append((episode_reward[0] + episode_reward[1])/2)
+                        else:
+                            self.rewards_history[fights_queue[i][0]][fights_queue[i][1]].append(episode_reward[0])
+                            carnivores[fights_queue[i][2]].balance_against[fights_queue[i][1]] += episode_reward[0]
+                            hives_balance_against[fights_queue[i][0]][fights_queue[i][1]] += episode_reward[0]
+                            hives_balance_against[fights_queue[i][1]][fights_queue[i][0]] += episode_reward[1]
+                            self.rewards_history[fights_queue[i][1]][fights_queue[i][0]].append(episode_reward[1])
+                            carnivores[fights_queue[i][3]].balance_against[fights_queue[i][0]] += episode_reward[1]
+
                     fights_queue = []
                     fight_flag = 0
 
@@ -671,12 +730,32 @@ class TwoAgentsAgent(object):
             if counter_for_fps % cycles_per_sec_dividers_list[chosen_cycles_per_second] == 0:
                 screen.fill(LIGHTGRAY)
                 draw_window()
+
                 # Animation to prevent Windows from hanging the window when paused.
                 # Also useful in approximating lag.
                 text_to_blit = font7.render(animation[0], True, (50, 50, 50))
-                screen.blit(text_to_blit, (1048, 648))
+                screen.blit(text_to_blit, (847, 651))
                 animation = animation + animation[0]
                 animation = animation[1:]
+
+            # Create reward charts on demand (left arrow button).
+            if want_rewards_visualisation == 1:
+                # Smaller number first.
+                print("1: DQN_one\n2: DQN_two\n3: AlwaysCoop\n4: AlwaysDefect\n5: GRIM\n6: Imperfect TFT\n7: Random\n8: Suspicious TFT\n9: Tit For Tat")
+                x = input("\nWhich agent do you want to see fight?: ")
+                y = input("Who will be the opponent?: ")
+                while x == '' or y == '' or int(x) > n or int(y) > n:
+                    print("### Invalid input. ###\n")
+                    print("1: DQN_one\n2: DQN_two\n3: AlwaysCoop\n4: AlwaysDefect\n5: GRIM\n6: Imperfect TFT\n7: Random\n8: Suspicious TFT\n9: Tit For Tat")
+                    x = input("\nWhich agent do you want to see fight?: ")
+                    y = input("Who will be the opponent?: ")
+                x = int(x)-1
+                y = int(y)-1
+                if x > -1 and y > -1 and x < n and y < n:
+                    pp.plot(self.rewards_history[x][y])
+                    pp.ylim([-120,480])
+                    pp.show()
+                want_rewards_visualisation = 0
 
             # "eat", then move.
             if not pause:
@@ -686,8 +765,7 @@ class TwoAgentsAgent(object):
                 if counter_for_fps % cycles_per_sec_dividers_list[chosen_cycles_per_second] == 0:
                     i.draw()
 
-
-            # check collisions
+            # check collisions and create fights.
             for j in carnivores:
                 if len(carnivores_pos[j.coord_y][j.coord_x]) > 1:
                     for i in carnivores:
@@ -697,14 +775,13 @@ class TwoAgentsAgent(object):
                                     if j.index != i.index:
                                         agents_fighting_queue.add(j.index)
                                         agents_fighting_queue.add(i.index)
-                                        fights_queue.append([j.hive, i.hive])
+                                        fights_queue.append([j.hive, i.hive, j.index, i.index, j.parameters, i.parameters])
                                         fight_flag = 1
                                         break
             agents_fighting_queue = set()
-            for i in fights_queue:
+            for i in fights_queue:  # swap the order of agents on the list so that smaller number is first (technical stuff)
                 if i[0] > i[1]:
                     i[0], i[1] = i[1], i[0]
-
 
             # Update the screen.
             pygame.display.flip()
@@ -715,7 +792,6 @@ class TwoAgentsAgent(object):
 
         # Return history.
         return history
-
 
 
 
@@ -885,8 +961,6 @@ class TwoAgentsAgent(object):
 
         return history
 
-
-
     def test_fight(self, env, nb_episodes=1, action_repetition=1, callbacks=None, visualize=True,
              nb_max_episode_steps=None, nb_max_start_steps=0, start_step_policy=None, verbose=1, player = None, player_one = None):
         """Callback that is called before training begins.
@@ -993,7 +1067,7 @@ class TwoAgentsAgent(object):
             while not done:
                 callbacks.on_step_begin(episode_step)
 
-                action = self.forward_test(observation, player, player_one)
+                action = self.forward_test(observation, player, player_one, 0, 0)
                 if self.processor is not None:
                     action = self.processor.process_action(action)
                 reward = [0, 0]
@@ -1039,7 +1113,7 @@ class TwoAgentsAgent(object):
             # resetting the environment. We need to pass in `terminal=False` here since
             # the *next* state, that is the state of the newly reset environment, is
             # always non-terminal by convention.
-            self.forward_test(observation, player, player_one)
+            self.forward_test(observation, player, player_one, 0, 0)
             self.backward([0, 0], terminal=False)
 
             # Report end of episode.
@@ -1052,7 +1126,6 @@ class TwoAgentsAgent(object):
         self._on_test_end()
 
         return history
-
 
 
     def reset_states(self):
