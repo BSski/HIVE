@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas
-
 import gym
+import os
 
 from keras.models import Sequential, Model, clone_model
 from keras.layers import Dense, Activation, Flatten, Input, Concatenate
@@ -25,8 +25,6 @@ from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 
 from keras.models import model_from_json
-import os
-
 
 presentation_mode = 0
 
@@ -35,8 +33,8 @@ np.random.seed(5000)
 env.seed(5000)
 
 # assert len(env.action_space.shape) == 1  # DDPG
-nb_actions = 2  # DQN
 # nb_actions = env.action_space.shape[0]  # DDPG
+nb_actions = 2  # DQN
 # print("Actions:", env.action_space.shape[0])
 # print("States:", env.observation_space.shape[0])
 
@@ -52,7 +50,6 @@ model.add(Dense(16, activation = 'relu'))
 model.add(Dense(16, activation = 'relu'))
 model.add(Dense(2, activation = 'sigmoid'))
 print(model.summary())
-
 
 """
 actor = Sequential()
@@ -71,7 +68,6 @@ actor.add(Dense(nb_actions))
 actor.add(Activation('sigmoid'))
 print(actor.summary())
 
-
 actor_two = Sequential()
 actor_two.add(Flatten(input_shape=(WINDOW_LENGTH,) + env.observation_space.shape))
 actor_two.add(Dense(64))
@@ -86,7 +82,6 @@ actor_two.add(Dense(16))
 actor_two.add(Activation('relu'))
 actor_two.add(Dense(nb_actions))
 actor_two.add(Activation('sigmoid'))
-
 
 
 action_input = Input(shape=(nb_actions,), name='action_input')
@@ -108,7 +103,6 @@ x = Activation('sigmoid')(x)
 critic = Model(inputs=[action_input, observation_input], outputs=x)
 print(critic.summary())
 
-
 action_input_two = Input(shape=(nb_actions,), name='action_input_two')
 observation_input_two = Input(shape=(WINDOW_LENGTH,) + env.observation_space.shape, name='observation_input_two')
 flattened_observation_two = Flatten()(observation_input_two)
@@ -127,25 +121,22 @@ y = Dense(1)(y)
 y = Activation('sigmoid')(y)
 critic_two = Model(inputs=[action_input_two, observation_input_two], outputs=y)
 
-
-
-
+# DDPG 1
 memory = SequentialMemory(limit=100000, window_length=WINDOW_LENGTH)
 random_process = OrnsteinUhlenbeckProcess(size=nb_actions, theta=.15, mu=0., sigma=.3)
 agentddpg = DDPGAgent(nb_actions=nb_actions, actor=actor, critic=critic, critic_action_input=action_input,
                   memory=memory, nb_steps_warmup_critic=1000, nb_steps_warmup_actor=1000,
                   random_process=random_process, gamma=GAMMA, target_model_update=1e-3)
-
 """
 
 """
+# DDPG 2
 memory_two = SequentialMemory(limit=100000, window_length=1)
 random_process_two = OrnsteinUhlenbeckProcess(size=nb_actions, theta=.15, mu=0., sigma=.3)
 agentddpg_two = DDPGAgent(nb_actions=nb_actions, actor=actor_two, critic=critic_two, critic_action_input=action_input,
                   memory=memory_two, nb_steps_warmup_critic=1000, nb_steps_warmup_actor=1000,
                   random_process=random_process_two, gamma=.99, target_model_update=1e-3)
 """
-
 
 
 policy = EpsGreedyQPolicy()
@@ -199,15 +190,40 @@ sus_titfortat = SuspiciousTitForTatAgent()
 titfortat = TitForTatAgent()
 
 
-# dodaj, ze jesli jeden i drugi agent sa NPCami, to nie odgrywa miedzy nimi gry
+
+#############################################################################
+############################      SETTINGS      #############################
+#############################################################################
+
 # Neural network agents first!
-sim_agent = SimultaneousAgent([dqn_one, dqn_two, dqn_three, dqn_four, dqn_five, dqn_six, randomagent, sus_titfortat, titfortat])
-sim_agent.compile([Adam(lr=0.001), Adam(lr=0.0001), Adam(lr=0.00001), Adam(lr=0.001), Adam(lr=0.0001), Adam(lr=0.00001), Adam(lr=0.0001), Adam(lr=0.0001), Adam(lr=0.0001)],
-                   metrics=[['mae'], ['mae'], ['mae'], ['mae'], ['mae'], ['mae'], ['mae'], ['mae'], ['mae']])
-his = sim_agent.fit(env, nb_steps=720000, verbose=2) # !! assert nb_steps % 720 == 0 !!
-#sim_agent.test(env, nb_episodes=30, visualize=False)
+hives_list = [dqn_one, dqn_two, dqn_three, dqn_four, dqn_five, dqn_six, randomagent, sus_titfortat, titfortat]
+nb_agents_in_hives = [20,  # DQN_one
+                      0,  # DQN_two
+                      0,  # AlwaysCoop
+                      0,  # AlwaysDefect
+                      0,  # GRIM
+                      0,  # Imperfect TFT
+                      0,  # Random
+                      0,  # Suspicious TFT
+                      20  # Tit For Tat
+                      ]
+
+#############################################################################
+#############################################################################
+#############################################################################
+optimizers_list = []
+metrics_list = []
+for i in range(len(hives_list)):
+    optimizers_list.append(Adam(lr=0.001))
+for i in range(len(hives_list)):
+    metrics_list.append(['mae'])
+
+# dodaj, ze jesli jeden i drugi agent sa NPCami, to nie odgrywa miedzy nimi gry
+sim_agent = SimultaneousAgent(hives_list)
+sim_agent.compile(optimizers_list,
+                   metrics=metrics_list)
+his = sim_agent.fit(env, verbose=2, nb_agents_in_hives=nb_agents_in_hives)
 # print(his.history)
-print("\nDone!")
 
 n = sim_agent.get_n()
 agents_games_log = sim_agent.get_agents_games_log()
@@ -249,12 +265,10 @@ while True:
         print(rewards_history)
         print(rewards_history[x][y])
 
-
         import matplotlib.pyplot as pp
         pp.plot(rewards_history[x][y])
         pp.ylim([-120,480])
         pp.show()
-
 
         sim_agent.test_fight(env, nb_episodes=1, visualize=False, player=x, player_one=y)
         actions_history_list = []
@@ -277,6 +291,5 @@ while True:
             print(round(actions_sum/int(len(actions_history_list)/20), 2), " ", end='')
         print("\n\n")
         """
-
     else:
         print("### At least one of those agents doesn't exist or player number is bigger than opponent number. ###\n")
