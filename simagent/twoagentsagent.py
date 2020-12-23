@@ -302,16 +302,16 @@ class TwoAgentsAgent(object):
         RED         = ( 255,  77,  77)
 
         # Load images.
-        PLUS_UP = pygame.image.load("sprites/PLUS_UP.png")
-        PLUS_DOWN = pygame.image.load("sprites/PLUS_DOWN.png")
-        MINUS_UP = pygame.image.load("sprites/MINUS_UP.png")
-        MINUS_DOWN = pygame.image.load("sprites/MINUS_DOWN.png")
-        RESET_UP = pygame.image.load("sprites/RESET_UP.png")
-        RESET_DOWN = pygame.image.load("sprites/RESET_DOWN.png")
-        START_UP = pygame.image.load("sprites/START_UP.png")
-        START_DOWN = pygame.image.load("sprites/START_DOWN.png")
-        PAUSE_UP = pygame.image.load("sprites/PAUSE_UP.png")
-        PAUSE_DOWN = pygame.image.load("sprites/PAUSE_DOWN.png")
+        PLUS_UP = pygame.image.load("sprites/plus_up.png")
+        PLUS_DOWN = pygame.image.load("sprites/plus_down.png")
+        MINUS_UP = pygame.image.load("sprites/minus_up.png")
+        MINUS_DOWN = pygame.image.load("sprites/minus_up.png")
+        RESET_UP = pygame.image.load("sprites/reset_up.png")
+        RESET_DOWN = pygame.image.load("sprites/reset_down.png")
+        START_UP = pygame.image.load("sprites/start_up.png")
+        START_DOWN = pygame.image.load("sprites/start_down.png")
+        PAUSE_UP = pygame.image.load("sprites/pause_up.png")
+        PAUSE_DOWN = pygame.image.load("sprites/pause_down.png")
 
         animation = "|/-\\"
 
