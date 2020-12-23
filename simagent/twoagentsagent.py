@@ -18,6 +18,7 @@ import pygame
 import random
 from grid import grid
 from positions import *
+from csv import writer
 
 
 class TwoAgentsAgent(object):
@@ -45,6 +46,7 @@ class TwoAgentsAgent(object):
         self.step = 0
 
         self.rewards_history = []
+        self.exit_after_this_sim = 0
 
     def get_config(self):
         """Configuration of the agent for serialization.
@@ -149,7 +151,9 @@ class TwoAgentsAgent(object):
 
         ##########################################################################
         def fight(self, env, action_repetition, callbacks, nb_max_start_steps, start_step_policy,
-        nb_max_episode_steps, episode_reward, episode_step, observation, episode, did_abort, player = None, player_one = None, agent_index = None, agent_one_index = None, parameters = [], parameters_one = []):
+                  nb_max_episode_steps, episode_reward, episode_step, observation, episode, did_abort,
+                  player = None, player_one = None, agent_index = None, agent_one_index = None,
+                  parameters = [], parameters_one = []):
             try:
                 print(player, player_one, parameters, parameters_one)
                 for i_step in range(20):
@@ -331,6 +335,8 @@ class TwoAgentsAgent(object):
         agents_fighting_queue = set()
         grid_size = 43 # max amount of agents = (grid_size-2)^2, if you exceed, they won't have space to spawn, max 43
         fight_flag = 0
+        sum_of_cash_for_hives = []
+        amount_of_games_to_log = 20
 
         def draw_window():
             logo = font4.render("H I V E", True, (80, 80, 80))
@@ -389,125 +395,231 @@ class TwoAgentsAgent(object):
 
             icons_div = 88
             # Hive 1 icon.
-            pygame.draw.rect(screen, ( 255, 255, 255), [19 , (icons_div+15*0), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*0)-1, 11, 11], 1)
+            pygame.draw.rect(screen, ( 255, 255, 255), [25 , (icons_div+15*0), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*0)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(nb_agents_in_hives[0]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*0))
             # Hive 2 icon.
-            pygame.draw.rect(screen, ( 255,   0,   0), [19, (icons_div+15*1), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*1)-1, 11, 11], 1)
+            pygame.draw.rect(screen, ( 255,   0,   0), [25, (icons_div+15*1), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*1)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(nb_agents_in_hives[1]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*1))
             # Hive 3 icon.
-            pygame.draw.rect(screen, (   0, 255,   0), [19, (icons_div+15*2), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*2)-1, 11, 11], 1)
+            pygame.draw.rect(screen, (   0, 255,   0), [25, (icons_div+15*2), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*2)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(nb_agents_in_hives[2]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*2))
             # Hive 4 icon.
-            pygame.draw.rect(screen, (   0,   0, 255), [19, (icons_div+15*3), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*3)-1, 11, 11], 1)
+            pygame.draw.rect(screen, (   0,   0, 255), [25, (icons_div+15*3), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*3)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(nb_agents_in_hives[3]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*3))
             # Hive 5 icon.
-            pygame.draw.rect(screen, ( 255, 255,   0), [19, (icons_div+15*4), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*4)-1, 11, 11], 1)
+            pygame.draw.rect(screen, ( 255, 255,   0), [25, (icons_div+15*4), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*4)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(nb_agents_in_hives[4]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*4))
             # Hive 6 icon.
-            pygame.draw.rect(screen, (   0, 255, 255), [19, (icons_div+15*5), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*5)-1, 11, 11], 1)
+            pygame.draw.rect(screen, (   0, 255, 255), [25, (icons_div+15*5), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*5)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(nb_agents_in_hives[5]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*5))
             # Hive 7 icon.
-            pygame.draw.rect(screen, ( 255,   0, 255), [19, (icons_div+15*6), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*6)-1, 11, 11], 1)
+            pygame.draw.rect(screen, ( 255,   0, 255), [25, (icons_div+15*6), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*6)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(nb_agents_in_hives[6]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*6))
             # Hive 8 icon.
-            pygame.draw.rect(screen, ( 128, 128,   0), [19, (icons_div+15*7), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*7)-1, 11, 11], 1)
+            pygame.draw.rect(screen, ( 128, 128,   0), [25, (icons_div+15*7), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*7)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(nb_agents_in_hives[7]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*7))
             # Hive 9 icon.
-            pygame.draw.rect(screen, (   0, 128,   0), [19, (icons_div+15*8), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [19-1, (icons_div+15*8)-1, 11, 11], 1)
+            pygame.draw.rect(screen, (   0, 128,   0), [25, (icons_div+15*8), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*8)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(nb_agents_in_hives[8]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*8))
 
 
-            text_to_blit = font2.render("HIVE 1 BALANCE AGAINST: ", True, (50, 50, 50))
-            screen.blit(text_to_blit, (664, 3 + 13*1))
-            text_to_blit = font2.render(("HIVE 1: " + "-"), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 3 + 13*2))
-            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[0][1])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 3 + 13*3))
-            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[0][2])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 3 + 13*4))
-            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[0][3])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 3 + 13*5))
-            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[0][4])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 3 + 13*6))
-            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[0][5])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 3 + 13*7))
 
-            text_to_blit = font2.render("HIVE 2 BALANCE AGAINST: ", True, (50, 50, 50))
-            screen.blit(text_to_blit, (664, 103 + 13*1))
-            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[1][0])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 103 + 13*2))
-            text_to_blit = font2.render(("HIVE 2: " + "-"), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 103 + 13*3))
-            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[1][2])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 103 + 13*4))
-            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[1][3])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 103 + 13*5))
-            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[1][4])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 103 + 13*6))
-            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[1][5])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 103 + 13*7))
-
-            text_to_blit = font2.render("HIVE 3 BALANCE AGAINST: ", True, (50, 50, 50))
-            screen.blit(text_to_blit, (664, 203 + 13*1))
-            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[2][0])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 203 + 13*2))
-            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[2][1])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 203 + 13*3))
-            text_to_blit = font2.render(("HIVE 3: " + "-"), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 203 + 13*4))
-            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[2][3])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 203 + 13*5))
-            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[2][4])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 203 + 13*6))
-            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[2][5])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 203 + 13*7))
-
-            text_to_blit = font2.render("HIVE 4 BALANCE AGAINST: ", True, (50, 50, 50))
-            screen.blit(text_to_blit, (664, 303 + 13*1))
-            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[3][0])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 303 + 13*2))
-            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[3][1])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 303 + 13*3))
-            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[3][2])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 303 + 13*4))
-            text_to_blit = font2.render(("HIVE 4: " + "-"), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 303 + 13*5))
-            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[3][4])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 303 + 13*6))
-            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[3][5])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 303 + 13*7))
+            if counter_for_fps % cycles_per_sec_dividers_list[chosen_cycles_per_second] == 0:
+                temp_sum_of_cash_for_hives = []
+                for i in range(len(hives_balance_against)):
+                    temp_sum = 0
+                    for j in range(len(hives_balance_against[i])):
+                        temp_sum += hives_balance_against[i][j]
+                    temp_sum_of_cash_for_hives.append(temp_sum)
+                #print("SUM:", sum_of_cash_for_hives)
+                sum_of_cash_for_hives = temp_sum_of_cash_for_hives
 
 
-            text_to_blit = font2.render("HIVE 5 BALANCE AGAINST: ", True, (50, 50, 50))
-            screen.blit(text_to_blit, (664, 403 + 13*1))
-            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[4][0])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 403 + 13*2))
-            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[4][1])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 403 + 13*3))
-            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[4][2])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 403 + 13*4))
-            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[4][3])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 403 + 13*5))
-            text_to_blit = font2.render(("HIVE 5: " + "-"), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 403 + 13*6))
-            text_to_blit = font2.render(("HIVE 6: " + str(hives_balance_against[4][5])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 403 + 13*7))
+            icons_div = 88
+            # Hive 1 icon.
+            pygame.draw.rect(screen, ( 255, 255, 255), [25 , (icons_div+15*10), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*10)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(sum_of_cash_for_hives[0]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*10))
+            # Hive 2 icon.
+            pygame.draw.rect(screen, ( 255,   0,   0), [25, (icons_div+15*11), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*11)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(sum_of_cash_for_hives[1]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*11))
+            # Hive 3 icon.
+            pygame.draw.rect(screen, (   0, 255,   0), [25, (icons_div+15*12), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*12)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(sum_of_cash_for_hives[2]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*12))
+            # Hive 4 icon.
+            pygame.draw.rect(screen, (   0,   0, 255), [25, (icons_div+15*13), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*13)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(sum_of_cash_for_hives[3]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*13))
+            # Hive 5 icon.
+            pygame.draw.rect(screen, ( 255, 255,   0), [25, (icons_div+15*14), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*14)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(sum_of_cash_for_hives[4]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*14))
+            # Hive 6 icon.
+            pygame.draw.rect(screen, (   0, 255, 255), [25, (icons_div+15*15), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*15)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(sum_of_cash_for_hives[5]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*15))
+            # Hive 7 icon.
+            pygame.draw.rect(screen, ( 255,   0, 255), [25, (icons_div+15*16), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*16)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(sum_of_cash_for_hives[6]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*16))
+            # Hive 8 icon.
+            pygame.draw.rect(screen, ( 128, 128,   0), [25, (icons_div+15*17), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*17)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(sum_of_cash_for_hives[7]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*17))
+            # Hive 9 icon.
+            pygame.draw.rect(screen, (   0, 128,   0), [25, (icons_div+15*18), 9, 9])
+            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*18)-1, 11, 11], 1)
+            text_to_blit = font2.render(str(sum_of_cash_for_hives[8]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (38, icons_div+15*18))
 
 
-            text_to_blit = font2.render("HIVE 6 BALANCE AGAINST: ", True, (50, 50, 50))
-            screen.blit(text_to_blit, (664, 503 + 13*1))
-            text_to_blit = font2.render(("HIVE 1: " + str(hives_balance_against[5][0])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 503 + 13*2))
-            text_to_blit = font2.render(("HIVE 2: " + str(hives_balance_against[5][1])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 503 + 13*3))
-            text_to_blit = font2.render(("HIVE 3: " + str(hives_balance_against[5][2])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 503 + 13*4))
-            text_to_blit = font2.render(("HIVE 4: " + str(hives_balance_against[5][3])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 503 + 13*5))
-            text_to_blit = font2.render(("HIVE 5: " + str(hives_balance_against[5][4])), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 503 + 13*6))
-            text_to_blit = font2.render(("HIVE 6: " + "-"), True, (50, 50, 50))
-            screen.blit(text_to_blit, (674, 503 + 13*7))
+            table_interline = 18
+            table_columns_width = 65
+            table_starting_y = 460
+            table_starting_x = 200
+
+            pygame.draw.line(screen, DARKERGRAY, (table_starting_x, 460+table_interline*1.8), (table_starting_x+table_columns_width*7, 460+table_interline*1.8), 1)
+            pygame.draw.line(screen, DARKERGRAY, (table_starting_x+table_columns_width*0.5, 460+table_interline*1.2), (table_starting_x+table_columns_width*0.5, 460+table_interline*8), 1)
+
+            text_to_blit = font2.render("H1", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y +table_interline*2))
+            text_to_blit = font2.render("H2", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*3))
+            text_to_blit = font2.render("H3", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*4))
+            text_to_blit = font2.render("H4", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*5))
+            text_to_blit = font2.render("H5", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*6))
+            text_to_blit = font2.render("H6", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*7))
+
+            table_starting_x = table_starting_x+table_columns_width
+            text_to_blit = font2.render("H1", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
+            text_to_blit = font2.render("-", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
+            text_to_blit = font2.render(str(hives_balance_against[0][1]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
+            text_to_blit = font2.render(str(hives_balance_against[0][2]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
+            text_to_blit = font2.render(str(hives_balance_against[0][3]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
+            text_to_blit = font2.render(str(hives_balance_against[0][4]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
+            text_to_blit = font2.render(str(hives_balance_against[0][5]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
+
+            table_starting_x = table_starting_x+table_columns_width
+            text_to_blit = font2.render("H2", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
+            text_to_blit = font2.render(str(hives_balance_against[1][0]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
+            text_to_blit = font2.render("-", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
+            text_to_blit = font2.render(str(hives_balance_against[1][2]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
+            text_to_blit = font2.render(str(hives_balance_against[1][3]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
+            text_to_blit = font2.render(str(hives_balance_against[1][4]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
+            text_to_blit = font2.render(str(hives_balance_against[1][5]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
+
+            table_starting_x = table_starting_x+table_columns_width
+            text_to_blit = font2.render("H3", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
+            text_to_blit = font2.render(str(hives_balance_against[2][0]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
+            text_to_blit = font2.render(str(hives_balance_against[2][1]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
+            text_to_blit = font2.render("-", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
+            text_to_blit = font2.render(str(hives_balance_against[2][3]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
+            text_to_blit = font2.render(str(hives_balance_against[2][4]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
+            text_to_blit = font2.render(str(hives_balance_against[2][5]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
+
+            table_starting_x = table_starting_x+table_columns_width
+            text_to_blit = font2.render("H4", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
+            text_to_blit = font2.render(str(hives_balance_against[3][0]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
+            text_to_blit = font2.render(str(hives_balance_against[3][1]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
+            text_to_blit = font2.render(str(hives_balance_against[3][2]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
+            text_to_blit = font2.render("-", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
+            text_to_blit = font2.render(str(hives_balance_against[3][4]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
+            text_to_blit = font2.render(str(hives_balance_against[3][5]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
+
+            table_starting_x = table_starting_x+table_columns_width
+            text_to_blit = font2.render("H5", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
+            text_to_blit = font2.render(str(hives_balance_against[4][0]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
+            text_to_blit = font2.render(str(hives_balance_against[4][1]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
+            text_to_blit = font2.render(str(hives_balance_against[4][2]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
+            text_to_blit = font2.render(str(hives_balance_against[4][3]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
+            text_to_blit = font2.render("-", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
+            text_to_blit = font2.render(str(hives_balance_against[4][5]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
+
+            table_starting_x = table_starting_x+table_columns_width
+            text_to_blit = font2.render("H6", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
+            text_to_blit = font2.render(str(hives_balance_against[5][0]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
+            text_to_blit = font2.render(str(hives_balance_against[5][1]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
+            text_to_blit = font2.render(str(hives_balance_against[5][2]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
+            text_to_blit = font2.render(str(hives_balance_against[5][3]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
+            text_to_blit = font2.render(str(hives_balance_against[5][4]), True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
+            text_to_blit = font2.render("-", True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
+
+            text_to_blit = font2.render("exit after this sim.? (backspace): " + str(self.exit_after_this_sim), True, (50, 50, 50))
+            screen.blit(text_to_blit, (19, 645))
 
         # Class creating animals.
         class Animal:
@@ -654,6 +766,13 @@ class TwoAgentsAgent(object):
         for i in range(0,9):
             spawn_carnivore(nb_agents_in_hives[i], i)
 
+        # Create list of hives present in current simulation.
+        hives_present_in_current_sim = []
+        for i in range(len(nb_agents_in_hives)):
+            if nb_agents_in_hives[i] != 0:
+                hives_present_in_current_sim.append(i)
+        print("hives_present_in_current_sim:", hives_present_in_current_sim)
+
         want_rewards_visualisation = 0
         n = self.get_n()  # amount of agent types in the current simulation
         # ################################# #
@@ -676,6 +795,11 @@ class TwoAgentsAgent(object):
                             pause = 1
                     if event.key == pygame.K_LEFT:
                         want_rewards_visualisation = 1
+                    if event.key == pygame.K_BACKSPACE:
+                        if self.exit_after_this_sim == 0:
+                            self.exit_after_this_sim = 1
+                        else:
+                            self.exit_after_this_sim = 0
 
             # Increase /counter/ with a step of a size of /tempo/ every frame,
             # if simulation isn't paused. If /counter/ is bigger than 120,
@@ -753,9 +877,23 @@ class TwoAgentsAgent(object):
                 y = int(y)-1
                 if x > -1 and y > -1 and x < n and y < n:
                     pp.plot(self.rewards_history[x][y])
-                    pp.ylim([-120,480])
+                    pp.ylim([-120, 480])
                     pp.show()
                 want_rewards_visualisation = 0
+
+
+
+            # Checking if all players played at least {amount_of_games_to_log} games.
+            if counter_for_fps % 180 == 0:
+                temp_counter = 0
+                for i in hives_present_in_current_sim:
+                    for j in hives_present_in_current_sim:
+                        if len(self.rewards_history[i][j]) < amount_of_games_to_log and len(self.rewards_history[i][j]) > 0:
+                            temp_counter += 1
+                if temp_counter == 0:
+                    pygame_done = True
+
+
 
             # "eat", then move.
             if not pause:
@@ -790,8 +928,26 @@ class TwoAgentsAgent(object):
         callbacks.on_train_end(logs={'did_abort': did_abort})
         self._on_train_end()
 
+        # After the simulation is done, append to .csv
+        for i in range(len(self.rewards_history)):
+            for j in range(len(self.rewards_history[i])):
+                # Open our existing CSV file in append mode.
+                # Create a file object for this file.
+                file_name = 'csv output/{}.csv'.format([i,j])
+                print("file-name:", file_name)
+                with open(file_name, 'a') as f_object:
+                    # Pass this file object to csv.writer()
+                    # and get a writer object.
+                    writer_object = writer(f_object)
+                    writer_object.writerow(self.rewards_history[i][j][:amount_of_games_to_log])
+                    #Close the file object
+                    f_object.close()
+
+
         # Return history.
         return history
+
+
 
 
 

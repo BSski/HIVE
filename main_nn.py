@@ -1,12 +1,15 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas
 import gym
 import os
+import sys
+
 
 from keras.models import Sequential, Model, clone_model
 from keras.layers import Dense, Activation, Flatten, Input, Concatenate
 from keras.optimizers import Adam
+from keras.models import model_from_json
 from simagent.simultaneous import SimultaneousAgent
 
 from npcs.alwayscooperate import AlwaysCooperateAgent
@@ -18,16 +21,30 @@ from npcs.suspicioustitfortat import SuspiciousTitForTatAgent
 from npcs.titfortat import TitForTatAgent
 
 from rl.agents.ddpg import DDPGAgent
-from rl.random import OrnsteinUhlenbeckProcess
-
 from rl.agents.dqn import DQNAgent
 from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
+from rl.random import OrnsteinUhlenbeckProcess
 
-from keras.models import model_from_json
+erase_csv_warning = 1
 
-presentation_mode = 0
+# Asking the user whether to overwrite all .csv files.
+if erase_csv_warning == 1:
+    answer = input("\nDo you want to overwrite all .csv files?: ")
+    if answer != 'yes':
+        sys.exit("\nYou decided not to proceed with the program.")
 
+
+# Clearing all .csv files.
+for i in range(9):
+    for j in range(9):
+        file_name = 'csv output/{}.csv'.format([i,j])
+        # Opening the file with w+ mode truncates the file.
+        f = open(file_name, "w+")
+        f.close()
+
+
+# Env initialization.
 env = gym.make('gym_tdh:Tdh-v0')
 np.random.seed(5000)
 env.seed(5000)
@@ -38,8 +55,9 @@ nb_actions = 2  # DQN
 # print("Actions:", env.action_space.shape[0])
 # print("States:", env.observation_space.shape[0])
 
-WINDOW_LENGTH = 9
-GAMMA = 0.99
+# Hyperparameters settings.
+WINDOW_LENGTH = 5
+GAMMA = 2
 GAMMA2 = 0.5
 
 model = Sequential()
@@ -146,17 +164,11 @@ dqn = DQNAgent(model, policy=policy, nb_actions=nb_actions, memory=memory, gamma
 model_one = clone_model(model)
 policy_one = EpsGreedyQPolicy()
 memory_one = SequentialMemory(limit=3000, window_length=WINDOW_LENGTH)
-# Loading models for presentation mode.
-if presentation_mode == 1:
-    model_one.load_weights("model0.h5")
 dqn_one = DQNAgent(model_one, policy=policy_one, nb_actions=nb_actions, memory=memory_one, gamma = GAMMA, enable_double_dqn=True, enable_dueling_network=True)
 
 model_two = clone_model(model)
 policy_two = EpsGreedyQPolicy()
 memory_two = SequentialMemory(limit=3000, window_length=WINDOW_LENGTH)
-# Loading models for presentation mode.
-if presentation_mode == 1:
-    model_two.load_weights("model1.h5")
 dqn_two = DQNAgent(model_two, policy=policy_two, nb_actions=nb_actions, memory=memory_two, gamma = GAMMA, enable_double_dqn=True, enable_dueling_network=True)
 
 model_three = clone_model(model)
@@ -180,7 +192,6 @@ memory_six = SequentialMemory(limit=3000, window_length=WINDOW_LENGTH)
 dqn_six = DQNAgent(model_six, policy=policy_six, nb_actions=nb_actions, memory=memory_six, gamma = GAMMA2, enable_double_dqn=True, enable_dueling_network=True)
 
 
-
 alwayscoop = AlwaysCooperateAgent()
 alwaysdefect = AlwaysDefectAgent()
 grim = GRIMAgent()
@@ -190,27 +201,27 @@ sus_titfortat = SuspiciousTitForTatAgent()
 titfortat = TitForTatAgent()
 
 
-
 #############################################################################
 ############################      SETTINGS      #############################
 #############################################################################
 
 # Neural network agents first!
-hives_list = [dqn_one, dqn_two, dqn_three, dqn_four, dqn_five, dqn_six, randomagent, sus_titfortat, titfortat]
-nb_agents_in_hives = [20,  # DQN_one
+hives_list = [dqn_one, dqn_two, alwayscoop, alwaysdefect, grim, imperfecttft, randomagent, sus_titfortat, titfortat]
+nb_agents_in_hives = [15,  # DQN_one
                       0,  # DQN_two
-                      0,  # AlwaysCoop
+                      15,  # AlwaysCoop
                       0,  # AlwaysDefect
                       0,  # GRIM
                       0,  # Imperfect TFT
                       0,  # Random
                       0,  # Suspicious TFT
-                      20  # Tit For Tat
+                      0  # Tit For Tat
                       ]
 
 #############################################################################
 #############################################################################
 #############################################################################
+
 optimizers_list = []
 metrics_list = []
 for i in range(len(hives_list)):
@@ -218,78 +229,20 @@ for i in range(len(hives_list)):
 for i in range(len(hives_list)):
     metrics_list.append(['mae'])
 
+
 # dodaj, ze jesli jeden i drugi agent sa NPCami, to nie odgrywa miedzy nimi gry
-sim_agent = SimultaneousAgent(hives_list)
-sim_agent.compile(optimizers_list,
-                   metrics=metrics_list)
-his = sim_agent.fit(env, verbose=2, nb_agents_in_hives=nb_agents_in_hives)
-# print(his.history)
+while True:
+    sim_agent = SimultaneousAgent(hives_list)
+    sim_agent.compile(optimizers_list,
+                       metrics=metrics_list)
+    sim_agent.save_weights('model.h5', overwrite=True)
+    his = sim_agent.fit(env, verbose=2, nb_agents_in_hives=nb_agents_in_hives)
+    sim_agent.load_weights('model.h5')
+    # print(his.history)
+    if sim_agent.exit_after_this_sim == 1:
+        break
+
 
 n = sim_agent.get_n()
 agents_games_log = sim_agent.get_agents_games_log()
 rewards_history = sim_agent.get_rewards_history()
-
-# Saving weights.
-# sim_agent.save_weights("model.h5")
-
-agents_names = {
-1: "DQN_one",
-2: "DQN_two",
-3: "AlwaysCoop",
-4: "AlwaysDefect",
-5: "GRIM",
-6: "Imperfect TFT",
-7: "Random",
-8: "Suspicious TFT",
-9: "Tit For Tat"
-}
-
-cls = lambda: os.system('cls')
-cls()
-percent_of_last_games = 0.05
-
-while True:
-    print("1: DQN_one\n2: DQN_two\n3: AlwaysCoop\n4: AlwaysDefect\n5: GRIM\n6: Imperfect TFT\n7: Random\n8: Suspicious TFT\n9: Tit For Tat")
-    x = input("\nWhich agent do you want to see fight?: ")
-    y = input("Who will be the opponent?: ")
-    while x == '' or y == '' or int(x) > n or int(y) > n:
-        cls()
-        print("### Invalid input. ###\n")
-        print("1: DQN_one\n2: DQN_two\n3: AlwaysCoop\n4: AlwaysDefect\n5: GRIM\n6: Imperfect TFT\n7: Random\n8: Suspicious TFT\n9: Tit For Tat")
-        x = input("\nWhich agent do you want to see fight?: ")
-        y = input("Who will be the opponent?: ")
-    cls()
-    x = int(x)-1
-    y = int(y)-1
-    if x > -1 and y > -1 and x < n and y < n:
-        print(rewards_history)
-        print(rewards_history[x][y])
-
-        import matplotlib.pyplot as pp
-        pp.plot(rewards_history[x][y])
-        pp.ylim([-120,480])
-        pp.show()
-
-        sim_agent.test_fight(env, nb_episodes=1, visualize=False, player=x, player_one=y)
-        actions_history_list = []
-        for i in range(int(len(agents_games_log[x])/(n-1)*percent_of_last_games)):
-            #print(agents_games_log[x][int(len(agents_games_log[x])*0.5+ i*(n-1)+ (y-1))-4][0])
-            for j in range(len(agents_games_log[x][int(len(agents_games_log[x])*percent_of_last_games+ i*(n-1)+ (y-1))-4][0])):
-                if j == 0:
-                    pass
-                else:
-                    actions_history_list.append(agents_games_log[x][int(len(agents_games_log[x])*percent_of_last_games+ i*(n-1)+ (y-1))-4][0][j])
-        #print("\n", actions_history_list, "\n")
-        """
-        print("\n\nMean actions of", agents_names[x+1], "against", agents_names[y+1], "in last", int(len(actions_history_list)/20), "games:")
-        for j in range(20):
-            actions_sum = 0
-            for i in range(int(len(actions_history_list)/20)):
-                actions_sum += actions_history_list[i*20+j]
-            #(actions_sum)
-            #print(int(len(actions_history_list)/20))
-            print(round(actions_sum/int(len(actions_history_list)/20), 2), " ", end='')
-        print("\n\n")
-        """
-    else:
-        print("### At least one of those agents doesn't exist or player number is bigger than opponent number. ###\n")
