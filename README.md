@@ -15,6 +15,10 @@ Requirements:
 
 Changelog:
 
+23.12
+- the program is running in cycles now, X simulations in a row
+- added appending data to .csv files after each simulation
+
 10.12
 - using DQN instead of DDPG (DDPG couldn't handle TFT)
 - UI changes
