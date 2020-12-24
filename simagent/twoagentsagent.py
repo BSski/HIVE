@@ -17,7 +17,9 @@ from callbacks import (
 import pygame
 import random
 from grid import grid
+from grid import grid_hex
 from positions import *
+from positions import boundary_tiles
 from csv import writer
 
 
@@ -44,7 +46,6 @@ class TwoAgentsAgent(object):
         self.processor = processor
         self.training = False
         self.step = 0
-
         self.rewards_history = []
         self.exit_after_this_sim = 0
 
@@ -126,28 +127,6 @@ class TwoAgentsAgent(object):
         episode_reward = None
         episode_step = None
         did_abort = False
-
-        hives_balance_against = [
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
-        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
-        ]
-
-        pygame.init()
-        size = (860, 670)
-        pygame.display.set_caption("HIVE")
-        screen = pygame.display.set_mode(size)
-        hive_icon = pygame.image.load('sprites/hive.png')
-        pygame.display.set_icon(hive_icon)
-        # Set the main loop to not done and initialize a clock.
-        pygame_done = False
-        clock = pygame.time.Clock()
 
         ##########################################################################
         def fight(self, env, action_repetition, callbacks, nb_max_start_steps, start_step_policy,
@@ -278,6 +257,16 @@ class TwoAgentsAgent(object):
 ##########################################################################
 ##########################################################################
 
+        pygame.init()
+        size = (860, 670)
+        pygame.display.set_caption("HIVE")
+        screen = pygame.display.set_mode(size)
+        hive_icon = pygame.image.load('sprites/hive.png')
+        pygame.display.set_icon(hive_icon)
+        # Set the main loop to not done and initialize a clock.
+        pygame_done = False
+        clock = pygame.time.Clock()
+
         font  = pygame.font.SysFont("liberationmono", 13)
         font2 = pygame.font.SysFont("liberationmono", 12)
         font3 = pygame.font.SysFont("liberationmono", 11)
@@ -338,6 +327,18 @@ class TwoAgentsAgent(object):
         sum_of_cash_for_hives = []
         amount_of_games_to_log = 20
 
+        hives_balance_against = [
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
+        {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
+        ]
+
         def draw_window():
             logo = font4.render("H I V E", True, (80, 80, 80))
             screen.blit(logo, (28, 18))
@@ -359,7 +360,7 @@ class TwoAgentsAgent(object):
             # Charts backgrounds.
             # pygame.draw.rect(screen, GRAY, [860, 44, 176, 6])
 
-            # Single hex
+            # Generate hex map.
             x = 213
             y = 9
             radius = 45
@@ -386,6 +387,17 @@ class TwoAgentsAgent(object):
                         pygame.draw.line(screen, GRAY, (x+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+7), (x+6+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+7), 1)
                         pygame.draw.line(screen, GRAY, (x+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+8), (x+4+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+8), 1)
 
+            ###
+
+            print("\n\n\n\n\n\n", boundary_tiles, "\n\n\n\n\n\n")
+            for i in boundary_tiles:
+                pygame.draw.line(screen, RED, (grid_hex[i[1]][i[0]][0]+2, grid_hex[i[1]][i[0]][1]), (grid_hex[i[1]][i[0]][0]+2+4, grid_hex[i[1]][i[0]][1]), 1)
+                pygame.draw.line(screen, RED, (grid_hex[i[1]][i[0]][0]+1, grid_hex[i[1]][i[0]][1]+1), (grid_hex[i[1]][i[0]][0]+1+6, grid_hex[i[1]][i[0]][1]+1), 1)
+                pygame.draw.rect(screen, RED, [grid_hex[i[1]][i[0]][0], grid_hex[i[1]][i[0]][1]+2, 9, 5])
+                pygame.draw.line(screen, RED, (grid_hex[i[1]][i[0]][0]+1, grid_hex[i[1]][i[0]][1]+7), (grid_hex[i[1]][i[0]][0]+1+6, grid_hex[i[1]][i[0]][1]+7), 1)
+                pygame.draw.line(screen, RED, (grid_hex[i[1]][i[0]][0]+2, grid_hex[i[1]][i[0]][1]+8), (grid_hex[i[1]][i[0]][0]+2+4, grid_hex[i[1]][i[0]][1]+8), 1)
+
+            ###
 
             # Main interface lines.
             pygame.draw.line(screen, GRAY, (12, 12), (12, 657), 1)
@@ -680,6 +692,8 @@ class TwoAgentsAgent(object):
                 self.forbidden_move = random.choice(("e", "w", "s", "n"))
                 self.possible_moves = ["e", "w", "s", "n"]
 
+                #self.forbidden_move = random.choice(("e", "w", "sw", "se", "nw", "ne"))
+                #self.possible_moves = ["e", "w", "sw", "se", "nw", "ne"]
             # Draw the animal on the screen.
             def draw(self):
                 pygame.draw.rect(screen, self.colors_dict[self.hive],
@@ -690,6 +704,56 @@ class TwoAgentsAgent(object):
                                  [grid[self.coord_y][self.coord_x][0],
                                   grid[self.coord_y][self.coord_x][1], 9, 9], 1)
 
+            """
+            # Move the animal in the positions list and change its coordinates.
+            def move(self):
+                if int(counter_prev) != int(counter):
+                    if int(counter) % 4 == 0:  # self.speed
+                        carnivores_pos[self.coord_y][self.coord_x] = \
+                            carnivores_pos[self.coord_y][self.coord_x][1:]
+
+                        if not (self.coord_x == 0 or
+                                self.coord_x == grid_size-1 or
+                                self.coord_y == 0 or
+                                self.coord_y == grid_size-1):
+                                # If all conditions satisfied:
+                            self.possible_moves.remove(self.forbidden_move)  # hash it if you want random movement
+                            move = random.choice(self.possible_moves)
+                            if move == "e":
+                                self.coord_x += 1
+                                self.forbidden_move = "w"
+                            elif move == "w":
+                                self.coord_x -= 1
+                                self.forbidden_move = "e"
+                            elif move == "sw":
+                                self.coord_y += 1
+                                self.forbidden_move = "ne"
+                            elif move == "se":
+                                self.coord_y -= 1
+                                self.forbidden_move = "nw"
+                            elif move == "ne":
+                                self.coord_y += 1
+                                self.forbidden_move = "sw"
+                            elif move == "nw":
+                                self.coord_y -= 1
+                                self.forbidden_move = "se"
+                        else:
+                            if self.coord_x == 0:
+                                self.coord_x += 1
+                                self.forbidden_move = "w"
+                            elif self.coord_x == grid_size-1:
+                                self.coord_x -= 1
+                                self.forbidden_move = "e"
+                            elif self.coord_y == 0:
+                                self.coord_y += 1
+                                self.forbidden_move = "n"
+                            elif self.coord_y == grid_size-1:
+                                self.coord_y -= 1
+                                self.forbidden_move = "s"
+                        self.possible_moves = ["e", "w", "s", "n"]
+                        carnivores_pos[self.coord_y][self.coord_x].append(1)
+
+            """
             # Move the animal in the positions list and change its coordinates.
             def move(self):
                 if int(counter_prev) != int(counter):
