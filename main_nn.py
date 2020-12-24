@@ -41,6 +41,7 @@ for i in range(9):
         file_name = 'csv output/{}.csv'.format([i,j])
         # Opening the file with w+ mode truncates the file.
         f = open(file_name, "w+")
+        f.write("test")
         f.close()
 
 
@@ -218,6 +219,17 @@ nb_agents_in_hives = [15,  # DQN_one
                       0  # Tit For Tat
                       ]
 
+hives_names = {
+1: "DQN_one",
+2: "DQN_two",
+3: "AlwaysCoop",
+4: "AlwaysDefect",
+5: "GRIM",
+6: "Imperfect TFT",
+7: "Random",
+8: "Suspicious TFT",
+9: "Tit For Tat"
+}
 #############################################################################
 #############################################################################
 #############################################################################
@@ -242,7 +254,8 @@ while True:
     if sim_agent.exit_after_this_sim == 1:
         break
 
+print("\nDone!")
 
-n = sim_agent.get_n()
-agents_games_log = sim_agent.get_agents_games_log()
-rewards_history = sim_agent.get_rewards_history()
+# n = sim_agent.get_n()
+# agents_games_log = sim_agent.get_agents_games_log()
+# rewards_history = sim_agent.get_rewards_history()
