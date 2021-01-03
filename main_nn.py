@@ -26,7 +26,7 @@ from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 from rl.random import OrnsteinUhlenbeckProcess
 
-erase_csv_warning = 1
+erase_csv_warning = 0
 
 # Asking the user whether to overwrite all .csv files.
 if erase_csv_warning == 1:
@@ -208,15 +208,15 @@ titfortat = TitForTatAgent()
 
 # Neural network agents first!
 hives_list = [dqn_one, dqn_two, alwayscoop, alwaysdefect, grim, imperfecttft, randomagent, sus_titfortat, titfortat]
-nb_agents_in_hives = [15,  # DQN_one
-                      0,  # DQN_two
-                      15,  # AlwaysCoop
-                      0,  # AlwaysDefect
-                      0,  # GRIM
-                      0,  # Imperfect TFT
-                      0,  # Random
-                      0,  # Suspicious TFT
-                      0  # Tit For Tat
+nb_agents_in_hives = [5,  # DQN_one
+                      5,  # DQN_two
+                      5,  # AlwaysCoop
+                      5,  # AlwaysDefect
+                      5,  # GRIM
+                      5,  # Imperfect TFT
+                      5,  # Random
+                      5,  # Suspicious TFT
+                      5  # Tit For Tat
                       ]
 
 hives_names = {
@@ -230,6 +230,7 @@ hives_names = {
 8: "Suspicious TFT",
 9: "Tit For Tat"
 }
+
 #############################################################################
 #############################################################################
 #############################################################################
@@ -243,12 +244,13 @@ for i in range(len(hives_list)):
 
 
 # dodaj, ze jesli jeden i drugi agent sa NPCami, to nie odgrywa miedzy nimi gry
-while True:
+#while True:
+for i in range(5):
     sim_agent = SimultaneousAgent(hives_list)
     sim_agent.compile(optimizers_list,
                        metrics=metrics_list)
     sim_agent.save_weights('model.h5', overwrite=True)
-    his = sim_agent.fit(env, verbose=2, nb_agents_in_hives=nb_agents_in_hives)
+    his = sim_agent.fit(env, verbose=2, nb_agents_in_hives=nb_agents_in_hives)  # debug_agent = 1
     sim_agent.load_weights('model.h5')
     # print(his.history)
     if sim_agent.exit_after_this_sim == 1:

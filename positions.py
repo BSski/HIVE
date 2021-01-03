@@ -17,7 +17,6 @@ diameter = 45
 for j in range((int(diameter/2)+1),(diameter*2)-1):
     row = []
     if j > diameter:
-
         if diameter - (j-diameter) < int(diameter/2)+1:
             break
         else:
@@ -27,7 +26,7 @@ for j in range((int(diameter/2)+1),(diameter*2)-1):
         row_quantity = j
         boundary_tiles.append([row_quantity-1, j-(int(diameter/2)+1)])
     for i in range(0, row_quantity):
-        row.append([i+1])
+        row.append([])
 
     carnivores_pos_hex.append(row)
 
@@ -44,4 +43,4 @@ for i in range(diameter-1):
 
 
 
-print("\n", boundary_tiles)
+# print("\n", boundary_tiles)

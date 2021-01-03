@@ -21,6 +21,7 @@ from grid import grid_hex
 from positions import *
 from positions import boundary_tiles
 from csv import writer
+import time
 
 
 class TwoAgentsAgent(object):
@@ -58,7 +59,7 @@ class TwoAgentsAgent(object):
 
     def fit(self, env, action_repetition=1, callbacks=None, verbose=1,
             visualize=False, nb_max_start_steps=0, start_step_policy=None, log_interval=10000,
-            nb_max_episode_steps=None, nb_agents_in_hives=[0,0,0,0,0,0,0,0,0]):
+            nb_max_episode_steps=None, nb_agents_in_hives=[0,0,0,0,0,0,0,0,0], debug_agent = 0):
         """Trains the agent on the given environment.
         # Arguments
             env: (`Env` instance): Environment that the agent interacts with. See [Env](#env) for details.
@@ -160,15 +161,15 @@ class TwoAgentsAgent(object):
                     callbacks.on_step_begin(episode_step)
                     # This is where all of the work happens. We first perceive and compute the action
                     # (forward step) and then use the reward to improve (backward step).
-                    action = self.forward_test(observation,
-                                               player,
-                                               player_one,
-                                               agent_index,
-                                               agent_one_index
-                                               )
+                    #action = self.forward_test(observation,
+                                              # player,
+                                              # player_one,
+                                              # agent_index,
+                                              # agent_one_index
+                                              # )
                     # if self.processor is not None:
                         # action = self.processor.process_action(action)
-
+                    action = [1,1]
                     # Parameters impact.
                     print("actions before parameters:", action)
                     #action[0] = (action[0] + (0.05 * parameters[0]))*(1-(parameters[1]*0.05))
@@ -200,8 +201,9 @@ class TwoAgentsAgent(object):
 
                     # nb_max_episode_steps was there, but it's gone now, since I'm doing that in env #
 
-                    metrics, metrics1 = self.backward_test(reward, terminal=done)
-
+                    #metrics, metrics1 = self.backward_test(reward, terminal=done)
+                    metrics = 0,0,0
+                    metrics1 = 0,0,0
                     episode_reward[0] += reward[0]
                     episode_reward[1] += reward[1]
                     print("### episode_reward", episode_reward)
@@ -226,13 +228,13 @@ class TwoAgentsAgent(object):
                         # resetting the environment. We need to pass in `terminal=False` here since
                         # the *next* state, that is the state of the newly reset environment, is
                         # always non-terminal by convention.
-                        self.forward_test(observation,
-                                          player,
-                                          player_one,
-                                          agent_index,
-                                          agent_one_index
-                                          )
-                        self.backward_test([0, 0], terminal=False)
+                        #self.forward_test(observation,
+                                          #player,
+                                          ##player_one,
+                                         # agent_index,
+                                         # agent_one_index
+                                         # )
+                        #self.backward_test([0, 0], terminal=False)
 
                         # This episode is finished, report and reset.
                         episode_logs = {
@@ -308,7 +310,7 @@ class TwoAgentsAgent(object):
         btn_tempo_plus_clicked = 0
         btn_tempo_minus_clicked = 0
 
-        tempo = 1                      # between 0.01 and 1    # default = 0.28
+        tempo = 1                  # between 0.01 and 1    # default = 0.28
         counter = 0
         counter_prev = counter
         counter_for_fps = 0
@@ -322,10 +324,11 @@ class TwoAgentsAgent(object):
         cycles_per_sec_dividers_list = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40]
         fights_queue = []
         agents_fighting_queue = set()
-        grid_size = 43 # max amount of agents = (grid_size-2)^2, if you exceed, they won't have space to spawn, max 43
+        grid_size = 45  # max amount of agents = (grid_size-2)^2, if you exceed, they won't have space to spawn, max 43
         fight_flag = 0
         sum_of_cash_for_hives = []
         amount_of_games_to_log = 20
+        debug_controllable_agent_present = debug_agent
 
         hives_balance_against = [
         {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0},
@@ -363,39 +366,38 @@ class TwoAgentsAgent(object):
             # Generate hex map.
             x = 213
             y = 9
-            radius = 45
-            for j in range((int(radius/2)+1),(radius*2)-1):
-                if j > radius:
-                    if radius - (j-radius) < int(radius/2)+1:
+            diameter = 45
+            for j in range((int(diameter/2)+1),(diameter*2)-1):
+                if j > diameter:
+                    if diameter - (j-diameter) < int(diameter/2)+1:
                         break
                     else:
-                        row_quantity = radius - (j-radius)
+                        row_quantity = diameter - (j-diameter)
                 else:
                     row_quantity = j
                 for i in range(0, row_quantity):
-                    shift = int((radius - row_quantity)/2)-1
+                    shift = int((diameter - row_quantity)/2)-1
                     if j % 2 == 0:
-                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1), (x+4+2+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1), 1)
-                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+1), (x+6+1+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+1), 1)
-                        pygame.draw.rect(screen, GRAY, [x+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)+1, 9, 5])
-                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+7), (x+6+1+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+7), 1)
-                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+8), (x+4+2+(10*i)+5+(shift*10), y+((j-int(radius/2))*9)-1+8), 1)
+                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+5+(shift*10), y+((j-int(diameter/2))*9)-1), (x+4+2+(10*i)+5+(shift*10), y+((j-int(diameter/2))*9)-1), 1)
+                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+5+(shift*10), y+((j-int(diameter/2))*9)-1+1), (x+6+1+(10*i)+5+(shift*10), y+((j-int(diameter/2))*9)-1+1), 1)
+                        pygame.draw.rect(screen, GRAY, [x+(10*i)+5+(shift*10), y+((j-int(diameter/2))*9)+1, 9, 5])
+                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+5+(shift*10), y+((j-int(diameter/2))*9)-1+7), (x+6+1+(10*i)+5+(shift*10), y+((j-int(diameter/2))*9)-1+7), 1)
+                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+5+(shift*10), y+((j-int(diameter/2))*9)-1+8), (x+4+2+(10*i)+5+(shift*10), y+((j-int(diameter/2))*9)-1+8), 1)
                     else:
-                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1), (x+4+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1), 1)
-                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+1), (x+6+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+1), 1)
-                        pygame.draw.rect(screen, GRAY, [x+(10*i)+(shift*10), y+((j-int(radius/2))*9)+1, 9, 5])
-                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+7), (x+6+1+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+7), 1)
-                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+8), (x+4+2+(10*i)+(shift*10), y+((j-int(radius/2))*9)-1+8), 1)
+                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1), (x+4+2+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1), 1)
+                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+1), (x+6+1+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+1), 1)
+                        pygame.draw.rect(screen, GRAY, [x+(10*i)+(shift*10), y+((j-int(diameter/2))*9)+1, 9, 5])
+                        pygame.draw.line(screen, GRAY, (x+1+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+7), (x+6+1+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+7), 1)
+                        pygame.draw.line(screen, GRAY, (x+2+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+8), (x+4+2+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+8), 1)
 
             ###
 
-            print("\n\n\n\n\n\n", boundary_tiles, "\n\n\n\n\n\n")
             for i in boundary_tiles:
-                pygame.draw.line(screen, RED, (grid_hex[i[1]][i[0]][0]+2, grid_hex[i[1]][i[0]][1]), (grid_hex[i[1]][i[0]][0]+2+4, grid_hex[i[1]][i[0]][1]), 1)
-                pygame.draw.line(screen, RED, (grid_hex[i[1]][i[0]][0]+1, grid_hex[i[1]][i[0]][1]+1), (grid_hex[i[1]][i[0]][0]+1+6, grid_hex[i[1]][i[0]][1]+1), 1)
-                pygame.draw.rect(screen, RED, [grid_hex[i[1]][i[0]][0], grid_hex[i[1]][i[0]][1]+2, 9, 5])
-                pygame.draw.line(screen, RED, (grid_hex[i[1]][i[0]][0]+1, grid_hex[i[1]][i[0]][1]+7), (grid_hex[i[1]][i[0]][0]+1+6, grid_hex[i[1]][i[0]][1]+7), 1)
-                pygame.draw.line(screen, RED, (grid_hex[i[1]][i[0]][0]+2, grid_hex[i[1]][i[0]][1]+8), (grid_hex[i[1]][i[0]][0]+2+4, grid_hex[i[1]][i[0]][1]+8), 1)
+                pygame.draw.line(screen, DARKGRAY, (grid_hex[i[1]][i[0]][0]+2, grid_hex[i[1]][i[0]][1]), (grid_hex[i[1]][i[0]][0]+2+4, grid_hex[i[1]][i[0]][1]), 1)
+                pygame.draw.line(screen, DARKGRAY, (grid_hex[i[1]][i[0]][0]+1, grid_hex[i[1]][i[0]][1]+1), (grid_hex[i[1]][i[0]][0]+1+6, grid_hex[i[1]][i[0]][1]+1), 1)
+                pygame.draw.rect(screen, DARKGRAY, [grid_hex[i[1]][i[0]][0], grid_hex[i[1]][i[0]][1]+2, 9, 5])
+                pygame.draw.line(screen, DARKGRAY, (grid_hex[i[1]][i[0]][0]+1, grid_hex[i[1]][i[0]][1]+7), (grid_hex[i[1]][i[0]][0]+1+6, grid_hex[i[1]][i[0]][1]+7), 1)
+                pygame.draw.line(screen, DARKGRAY, (grid_hex[i[1]][i[0]][0]+2, grid_hex[i[1]][i[0]][1]+8), (grid_hex[i[1]][i[0]][0]+2+4, grid_hex[i[1]][i[0]][1]+8), 1)
 
             ###
 
@@ -633,6 +635,7 @@ class TwoAgentsAgent(object):
             text_to_blit = font2.render("exit after this sim.? (backspace): " + str(self.exit_after_this_sim), True, (50, 50, 50))
             screen.blit(text_to_blit, (19, 645))
 
+
         # Class creating animals.
         class Animal:
             def __init__(self, coord_x, coord_y, index, dna):
@@ -662,20 +665,23 @@ class TwoAgentsAgent(object):
             def __init__(self, coord_x, coord_y, index, hive, parameters):
                 self.coord_x = coord_x
                 self.coord_y = coord_y
+                self.previous_coord_x = self.coord_x
+                self.previous_coord_y = self.coord_y
                 self.account = 5000
                 self.index = index
                 self.hive = hive
                 self.parameters = parameters
+
                 self.colors_dict = {
-                0 : (255, 255, 255),
-                1 : (255,   0,   0),
-                2 : (  0, 255,   0),
-                3 : (  0,   0, 255),
-                4 : (255, 255,   0),
-                5 : (  0, 255, 255),
-                6 : (255,   0, 255),
-                7 : (128, 128,   0),
-                8 : (  0, 128,   0)
+                0 : ((255, 255, 255), (200, 200, 200)),
+                1 : ((225, 83, 94), (198, 47, 71)),
+                2 : ((  0, 190,   0), (  0, 130,   0)),
+                3 : ((150, 149, 175), (130, 83, 170)),
+                4 : ((248, 204, 0), (249, 170, 14)),
+                5 : ((89, 206, 228), (55, 141, 194)),
+                6 : ((225, 64, 201), (172, 56, 191)),
+                7 : ((133, 90, 83), (117, 54, 42)),
+                8 : (( 10, 120, 14), ( 10, 82, 14))
                 }
                 self.balance_against = {
                 0 : 0,
@@ -689,141 +695,258 @@ class TwoAgentsAgent(object):
                 8 : 0
                 }
                 self.color = 0
-                self.forbidden_move = random.choice(("e", "w", "s", "n"))
-                self.possible_moves = ["e", "w", "s", "n"]
 
-                #self.forbidden_move = random.choice(("e", "w", "sw", "se", "nw", "ne"))
-                #self.possible_moves = ["e", "w", "sw", "se", "nw", "ne"]
+                self.forbidden_move = random.choice(("e", "w", "sw", "se", "nw", "ne"))
+                self.possible_moves = ["e", "w", "sw", "se", "nw", "ne"]
+
             # Draw the animal on the screen.
             def draw(self):
-                pygame.draw.rect(screen, self.colors_dict[self.hive],
-                                     [grid[self.coord_y][self.coord_x][0]+1,
-                                      grid[self.coord_y][self.coord_x][1]+1, 7, 7])
+                pygame.draw.line(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]), (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]), 1)
+                pygame.draw.line(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+1-1, grid_hex[self.coord_y][self.coord_x][1]+2), (grid_hex[self.coord_y][self.coord_x][0]+1-1, grid_hex[self.coord_y][self.coord_x][1]+6), 1)
+                pygame.draw.line(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+1+7, grid_hex[self.coord_y][self.coord_x][1]+2), (grid_hex[self.coord_y][self.coord_x][0]+1+7, grid_hex[self.coord_y][self.coord_x][1]+6), 1)
+                pygame.draw.line(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]+8), (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]+8), 1)
+                pygame.draw.rect(screen, self.colors_dict[self.hive][0], [grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1, 7, 7])
+
+                pygame.draw.circle(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1), 0)
+                pygame.draw.circle(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+1), 0)
+                pygame.draw.circle(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+7), 0)
+                pygame.draw.circle(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+7), 0)
+                pygame.draw.circle(screen, GRAY, (grid_hex[self.coord_y][self.coord_x][0]+6, grid_hex[self.coord_y][self.coord_x][1]+2), 0)
+                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8-8), 0)
+
                 # Draw its border.
-                pygame.draw.rect(screen, DARKERGRAY,
-                                 [grid[self.coord_y][self.coord_x][0],
-                                  grid[self.coord_y][self.coord_x][1], 9, 9], 1)
+                pygame.draw.line(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]-1), (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]-1), 1)
+                pygame.draw.line(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+1-2, grid_hex[self.coord_y][self.coord_x][1]+2), (grid_hex[self.coord_y][self.coord_x][0]+1-2, grid_hex[self.coord_y][self.coord_x][1]+6), 1)
+                pygame.draw.line(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+1+10-2, grid_hex[self.coord_y][self.coord_x][1]+2), (grid_hex[self.coord_y][self.coord_x][0]+1+10-2, grid_hex[self.coord_y][self.coord_x][1]+6), 1)
+                pygame.draw.line(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]+8+1), (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]+8+1), 1)
+                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2-2, grid_hex[self.coord_y][self.coord_x][1]+8-7), 0)
+                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2-1, grid_hex[self.coord_y][self.coord_x][1]+8-8), 0)
+                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8-8), 0)
+                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+6, grid_hex[self.coord_y][self.coord_x][1]+8-7), 0)
+                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8+0), 0)
+                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+6, grid_hex[self.coord_y][self.coord_x][1]+8-1), 0)
+                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2-1, grid_hex[self.coord_y][self.coord_x][1]+8+0), 0)
+                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2-2, grid_hex[self.coord_y][self.coord_x][1]+8-1), 0)
 
-            """
             # Move the animal in the positions list and change its coordinates.
             def move(self):
                 if int(counter_prev) != int(counter):
                     if int(counter) % 4 == 0:  # self.speed
-                        carnivores_pos[self.coord_y][self.coord_x] = \
-                            carnivores_pos[self.coord_y][self.coord_x][1:]
+                        carnivores_pos_hex[self.coord_y][self.coord_x] = \
+                            carnivores_pos_hex[self.coord_y][self.coord_x][1:]
 
-                        if not (self.coord_x == 0 or
-                                self.coord_x == grid_size-1 or
-                                self.coord_y == 0 or
-                                self.coord_y == grid_size-1):
-                                # If all conditions satisfied:
+                        pre_previous_coord_x = self.previous_coord_x
+                        pre_previous_coord_y = self.previous_coord_y
+
+                        self.previous_coord_x = self.coord_x
+                        self.previous_coord_y = self.coord_y
+
+                        if not [self.coord_x, self.coord_y] in boundary_tiles:
                             self.possible_moves.remove(self.forbidden_move)  # hash it if you want random movement
                             move = random.choice(self.possible_moves)
-                            if move == "e":
-                                self.coord_x += 1
-                                self.forbidden_move = "w"
-                            elif move == "w":
-                                self.coord_x -= 1
-                                self.forbidden_move = "e"
-                            elif move == "sw":
-                                self.coord_y += 1
-                                self.forbidden_move = "ne"
-                            elif move == "se":
-                                self.coord_y -= 1
-                                self.forbidden_move = "nw"
-                            elif move == "ne":
-                                self.coord_y += 1
-                                self.forbidden_move = "sw"
-                            elif move == "nw":
-                                self.coord_y -= 1
-                                self.forbidden_move = "se"
-                        else:
-                            if self.coord_x == 0:
-                                self.coord_x += 1
-                                self.forbidden_move = "w"
-                            elif self.coord_x == grid_size-1:
-                                self.coord_x -= 1
-                                self.forbidden_move = "e"
-                            elif self.coord_y == 0:
-                                self.coord_y += 1
-                                self.forbidden_move = "n"
-                            elif self.coord_y == grid_size-1:
-                                self.coord_y -= 1
-                                self.forbidden_move = "s"
-                        self.possible_moves = ["e", "w", "s", "n"]
-                        carnivores_pos[self.coord_y][self.coord_x].append(1)
+                            print(self.index, move, self.hive, " |||||", self.possible_moves, "|||||", self.forbidden_move)
+                            if self.coord_y > int(diameter/2):
+                                if move == "e":
+                                    self.coord_x += 1
+                                    self.forbidden_move = "w"
+                                elif move == "w":
+                                    self.coord_x -= 1
+                                    self.forbidden_move = "e"
+                                elif move == "sw":
+                                    self.coord_x -= 1
+                                    self.coord_y += 1
+                                    self.forbidden_move = "ne"
+                                elif move == "se":
+                                    self.coord_y += 1
+                                    self.forbidden_move = "nw"
+                                elif move == "ne":
+                                    self.coord_x += 1
+                                    self.coord_y -= 1
+                                    self.forbidden_move = "sw"
+                                elif move == "nw":
+                                    self.coord_y -= 1
+                                    self.forbidden_move = "se"
+                            elif self.coord_y < int(diameter/2):
+                                if move == "e":
+                                    self.coord_x += 1
+                                    self.forbidden_move = "w"
+                                elif move == "w":
+                                    self.coord_x -= 1
+                                    self.forbidden_move = "e"
+                                elif move == "sw":
+                                    self.coord_y += 1
+                                    self.forbidden_move = "ne"
+                                elif move == "se":
+                                    self.coord_y += 1
+                                    self.coord_x += 1
+                                    self.forbidden_move = "nw"
+                                elif move == "ne":
+                                    self.coord_y -= 1
+                                    self.forbidden_move = "sw"
+                                elif move == "nw":
+                                    self.coord_y -= 1
+                                    self.coord_x -= 1
+                                    self.forbidden_move = "se"
+                            else:  # self.coord_y == diameter-1
+                                if move == "e":
+                                    self.coord_x += 1
+                                    self.forbidden_move = "w"
+                                elif move == "w":
+                                    self.coord_x -= 1
+                                    self.forbidden_move = "e"
+                                elif move == "sw":
+                                    self.coord_x -= 1
+                                    self.coord_y += 1
+                                    self.forbidden_move = "ne"
+                                elif move == "se":
+                                    self.coord_y += 1
+                                    self.forbidden_move = "nw"
+                                elif move == "ne":
+                                    self.coord_y -= 1
+                                    self.forbidden_move = "sw"
+                                elif move == "nw":
+                                    self.coord_x -= 1
+                                    self.coord_y -= 1
+                                    self.forbidden_move = "se"
 
-            """
-            # Move the animal in the positions list and change its coordinates.
+                            if self.coord_x == pre_previous_coord_x and self.coord_y == pre_previous_coord_y:
+                                print("####### WLASNIE ZAPOBIEGNIETO COFNIECIU SIE####################################################")
+                                self.coord_x = self.previous_coord_x
+                                self.coord_y = self.previous_coord_y
+                        else:
+                            self.coord_x = pre_previous_coord_x
+                            self.coord_y = pre_previous_coord_y
+
+                            # how to forbid from moving to previous tile?
+
+
+                        self.possible_moves = ["e", "w", "sw", "se", "nw", "ne"]
+                        try:
+                            carnivores_pos_hex[self.coord_y][self.coord_x].append(1)
+                        except:
+                            print(self.coord_y, self.coord_x)
+                            time.sleep(1000000)
+
+
+        class ControllableAgent(Carnivore):
+            move_to_do = ""
+
+            def __init__(self):
+                super(ControllableAgent, self).__init__(38, 24, -1, 0, [random.randint(-3,3),
+                                                    random.randint(-3,3),
+                                                    random.randint(-3,3),
+                                                    random.randint(-3,3)])
+
             def move(self):
-                if int(counter_prev) != int(counter):
-                    if int(counter) % 4 == 0:  # self.speed
-                        carnivores_pos[self.coord_y][self.coord_x] = \
-                            carnivores_pos[self.coord_y][self.coord_x][1:]
+                #carnivores_pos_hex[self.coord_y][self.coord_x] = \
+                    #carnivores_pos_hex[self.coord_y][self.coord_x][1:]
 
-                        if not (self.coord_x == 0 or
-                                self.coord_x == grid_size-1 or
-                                self.coord_y == 0 or
-                                self.coord_y == grid_size-1):
-                                # If all conditions satisfied:
-                            self.possible_moves.remove(self.forbidden_move)  # hash it if you want random movement
-                            move = random.choice(self.possible_moves)
-                            if move == "e":
-                                self.coord_x += 1
-                                self.forbidden_move = "w"
-                            elif move == "w":
-                                self.coord_x -= 1
-                                self.forbidden_move = "e"
-                            elif move == "s":
-                                self.coord_y += 1
-                                self.forbidden_move = "n"
-                            elif move == "n":
-                                self.coord_y -= 1
-                                self.forbidden_move = "s"
-                        else:
-                            if self.coord_x == 0:
-                                self.coord_x += 1
-                                self.forbidden_move = "w"
-                            elif self.coord_x == grid_size-1:
-                                self.coord_x -= 1
-                                self.forbidden_move = "e"
-                            elif self.coord_y == 0:
-                                self.coord_y += 1
-                                self.forbidden_move = "n"
-                            elif self.coord_y == grid_size-1:
-                                self.coord_y -= 1
-                                self.forbidden_move = "s"
-                        self.possible_moves = ["e", "w", "s", "n"]
-                        carnivores_pos[self.coord_y][self.coord_x].append(1)
+                if self.coord_y > int(diameter/2):
+                    if self.move_to_do == "e":
+                        self.coord_x += 1
+                        self.forbidden_move = "w"
+                    elif self.move_to_do == "w":
+                        self.coord_x -= 1
+                        self.forbidden_move = "e"
+                    elif self.move_to_do == "sw":
+                        self.coord_x -= 1
+                        self.coord_y += 1
+                        self.forbidden_move = "ne"
+                    elif self.move_to_do == "se":
+                        self.coord_y += 1
+                        self.forbidden_move = "nw"
+                    elif self.move_to_do == "ne":
+                        self.coord_x += 1
+                        self.coord_y -= 1
+                        self.forbidden_move = "sw"
+                    elif self.move_to_do == "nw":
+                        self.coord_y -= 1
+                        self.forbidden_move = "se"
+                elif self.coord_y < int(diameter/2):
+                    if self.move_to_do == "e":
+                        self.coord_x += 1
+                        self.forbidden_move = "w"
+                    elif self.move_to_do == "w":
+                        self.coord_x -= 1
+                        self.forbidden_move = "e"
+                    elif self.move_to_do == "sw":
+                        self.coord_y += 1
+                        self.forbidden_move = "ne"
+                    elif self.move_to_do == "se":
+                        self.coord_y += 1
+                        self.coord_x += 1
+                        self.forbidden_move = "nw"
+                    elif self.move_to_do == "ne":
+                        self.coord_y -= 1
+                        self.forbidden_move = "sw"
+                    elif self.move_to_do == "nw":
+                        self.coord_y -= 1
+                        self.coord_x -= 1
+                        self.forbidden_move = "se"
+                else:  # self.coord_y == diameter-1
+                    if self.move_to_do == "e":
+                        self.coord_x += 1
+                        self.forbidden_move = "w"
+                    elif self.move_to_do == "w":
+                        self.coord_x -= 1
+                        self.forbidden_move = "e"
+                    elif self.move_to_do == "sw":
+                        self.coord_x -= 1
+                        self.coord_y += 1
+                        self.forbidden_move = "ne"
+                    elif self.move_to_do == "se":
+                        self.coord_y += 1
+                        self.forbidden_move = "nw"
+                    elif self.move_to_do == "ne":
+                        self.coord_y -= 1
+                        self.forbidden_move = "sw"
+                    elif self.move_to_do == "nw":
+                        self.coord_x -= 1
+                        self.coord_y -= 1
+                        self.forbidden_move = "se"
+
+                if self.coord_y > len(grid_hex)-1:
+                    self.coord_y = 0
+                if self.coord_x > len(grid_hex[self.coord_y])-1:
+                    self.coord_x = 0
+                if self.coord_y < 0:
+                    self.coord_y = diameter-1
+                if self.coord_x < 0:
+                    self.coord_x = len(grid_hex[self.coord_y])-1
+
+                self.move_to_do = ""
+                #carnivores_pos_hex[self.coord_y][self.coord_x].append(1)
+
+
 
         # Spawn a new carnivore.
         def spawn_carnivore(amount, hive):
             amount_left_to_spawn = amount
             while amount_left_to_spawn != 0:
+                pos_x = random.randint(1, int(grid_size/2))
                 pos_y = random.randint(1, grid_size-2)
-                pos_x = random.randint(1, grid_size-2)
-                if len(carnivores_pos[pos_y][pos_x]) < 1:
+                if len(carnivores_pos_hex[pos_y][pos_x]) < 1:
                     carnivores.append(Carnivore(pos_x, pos_y, len(carnivores), hive, [
                                                       random.randint(-3,3),
                                                       random.randint(-3,3),
                                                       random.randint(-3,3),
                                                       random.randint(-3,3)]))
-                    carnivores_pos[pos_y][pos_x].append(1)
+                    carnivores_pos_hex[pos_y][pos_x].append(1)
                     amount_left_to_spawn -= 1
 
         # Spawn a new carnivore but with different parameters setting.
         def spawn_barnivore(amount, hive):
             amount_left_to_spawn = amount
             while amount_left_to_spawn != 0:
+                pos_x = random.randint(1, int(grid_size/2))
                 pos_y = random.randint(1, grid_size-2)
-                pos_x = random.randint(1, grid_size-2)
-                if len(carnivores_pos[pos_y][pos_x]) < 1:
+                if len(carnivores_pos_hex[pos_y][pos_x]) < 1:
                     carnivores.append(Carnivore(pos_x, pos_y, len(carnivores), hive, [
                                                       random.randint(0,1),
                                                       random.randint(0,1),
                                                       random.randint(0,1),
                                                       random.randint(0,1)]))
-                    carnivores_pos[pos_y][pos_x].append(1)
+                    carnivores_pos_hex[pos_y][pos_x].append(1)
                     amount_left_to_spawn -= 1
 
         # Spawn agents.
@@ -836,6 +959,11 @@ class TwoAgentsAgent(object):
             if nb_agents_in_hives[i] != 0:
                 hives_present_in_current_sim.append(i)
         print("hives_present_in_current_sim:", hives_present_in_current_sim)
+
+        # Create controllable agent
+        if debug_controllable_agent_present == 1:
+            controllable_agent = ControllableAgent()
+
 
         want_rewards_visualisation = 0
         n = self.get_n()  # amount of agent types in the current simulation
@@ -864,7 +992,19 @@ class TwoAgentsAgent(object):
                             self.exit_after_this_sim = 1
                         else:
                             self.exit_after_this_sim = 0
-
+                    if debug_controllable_agent_present == 1:
+                        if event.key == pygame.K_y:
+                            controllable_agent.move_to_do = "nw"
+                        elif event.key == pygame.K_u:
+                            controllable_agent.move_to_do = "ne"
+                        elif event.key == pygame.K_j:
+                            controllable_agent.move_to_do = "e"
+                        elif event.key == pygame.K_n:
+                            controllable_agent.move_to_do = "se"
+                        elif event.key == pygame.K_b:
+                            controllable_agent.move_to_do = "sw"
+                        elif event.key == pygame.K_g:
+                            controllable_agent.move_to_do = "w"
             # Increase /counter/ with a step of a size of /tempo/ every frame,
             # if simulation isn't paused. If /counter/ is bigger than 120,
             # reset it, and increase /big_counter/ by 1.
@@ -946,7 +1086,7 @@ class TwoAgentsAgent(object):
                 want_rewards_visualisation = 0
 
 
-
+            """
             # Checking if all players played at least {amount_of_games_to_log} games.
             if counter_for_fps % 180 == 0:
                 temp_counter = 0
@@ -956,20 +1096,26 @@ class TwoAgentsAgent(object):
                             temp_counter += 1
                 if temp_counter == 0:
                     pygame_done = True
-
+            """
 
 
             # "eat", then move.
             if not pause:
                 for i in carnivores:
                     i.move()
+            if debug_controllable_agent_present == 1:
+                controllable_agent.move()
+
             for i in carnivores:
                 if counter_for_fps % cycles_per_sec_dividers_list[chosen_cycles_per_second] == 0:
                     i.draw()
+            if debug_controllable_agent_present == 1:
+                if counter_for_fps % cycles_per_sec_dividers_list[chosen_cycles_per_second] == 0:
+                    controllable_agent.draw()
 
             # check collisions and create fights.
             for j in carnivores:
-                if len(carnivores_pos[j.coord_y][j.coord_x]) > 1:
+                if len(carnivores_pos_hex[j.coord_y][j.coord_x]) > 1:
                     for i in carnivores:
                         if j.get_coords()[0] == i.get_coords()[0] and j.get_coords()[1] == i.get_coords()[1]:
                             if int(counter_prev) != int(counter) and int(counter) % 4 == 0:
