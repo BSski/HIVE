@@ -16,6 +16,10 @@ Requirements:
 
 Changelog:
 
+03.01
+- board's nature is hexagonal now instead of rectangular
+- added optional controllable debug agent
+
 23.12
 - the program is running in cycles now, X simulations in a row
 - added appending data to .csv files after each simulation
