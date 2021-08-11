@@ -15,8 +15,9 @@ Requirements:
 
 
 Changelog:
-02.2021
-- created no GUI version
+
+01.02.2021
+- special no GUI version for conducting experiments
 
 03.01.2021
 - board's nature is hexagonal now instead of rectangular
