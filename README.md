@@ -1,4 +1,4 @@
-<h1 align="center"># HIVE</h1>
+<h1 align="center">HIVE</h1>
 
 # Requirements:
 - Python 3.7.8 64 bit
