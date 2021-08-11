@@ -7,10 +7,11 @@ class SuspiciousTitForTatAgent(Agent):
     NPC Suspicious Tit For Tat Agent
     Defects on the first round and imitates its opponent's previous move thereafter.
     """
-    def __init__(self):
+    def __init__(self, nb_actions):
         super(SuspiciousTitForTatAgent, self).__init__()
         self.compiled = False
         self.step = 0
+        self.nb_actions = nb_actions
         # State.
         self.reset_states()
 
@@ -23,13 +24,13 @@ class SuspiciousTitForTatAgent(Agent):
 
     def forward(self, observation):
         # Set step number.
-        self.step = observation[1]
+        self.step = observation[0]
 
         # Select an action.
         if self.step == -1:
-            action = 1
+            action = self.nb_actions*1
         else:
-            action = observation[0]
+            action = self.nb_actions*observation[2]
 
         # Book-keeping.
         self.recent_observation = observation

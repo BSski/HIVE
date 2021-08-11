@@ -7,10 +7,11 @@ class AlwaysDefectAgent(Agent):
     NPC Always Defect Agent
     Defects unconditionally.
     """
-    def __init__(self):
+    def __init__(self, nb_actions):
         super(AlwaysDefectAgent, self).__init__()
         self.compiled = False
         self.step = 0
+        self.nb_actions = nb_actions
         # State.
         self.reset_states()
 
@@ -23,10 +24,10 @@ class AlwaysDefectAgent(Agent):
 
     def forward(self, observation):
         # Set step number.
-        self.step = observation[1]
-        
+        self.step = observation[0]
+
         # Select an action.
-        action = 1
+        action = self.nb_actions*1
 
         # Book-keeping.
         self.recent_observation = observation

@@ -23,10 +23,10 @@ class AlwaysCooperateAgent(Agent):
 
     def forward(self, observation):
         # Set step number.
-        self.step = observation[1]
+        self.step = observation[0]
 
         # Select an action.
-        action = -1
+        action = 0
 
         # Book-keeping.
         self.recent_observation = observation

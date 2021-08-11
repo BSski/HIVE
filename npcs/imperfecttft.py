@@ -7,10 +7,11 @@ class ImperfectTitForTatAgent(Agent):
     NPC Imperfect Tit For Tat
     Imitates opponent's last move with high (but less than one) probability.
     """
-    def __init__(self):
+    def __init__(self, nb_actions):
         super(ImperfectTitForTatAgent, self).__init__()
         self.compiled = False
         self.step = 0
+        self.nb_actions = nb_actions
         # State.
         self.reset_states()
 
@@ -23,19 +24,19 @@ class ImperfectTitForTatAgent(Agent):
 
     def forward(self, observation):
         # Set step number.
-        self.step = observation[1]
+        self.step = observation[0]
 
         # Select an action.
         if self.step == -1:
-            action = -1
+            action = 0
         else:
             if random.randint(0, 100) > 10:
-                action = observation[0]
+                action = self.nb_actions*observation[2]
             else:
-                if observation[0] == 1:
-                    action = -1
-                if observation[0] == 0:
-                    action = 1
+                if observation[2] == 1:
+                    action = 0
+                if observation[2] == 0:
+                    action = self.nb_actions*1
 
 
         # Book-keeping.
