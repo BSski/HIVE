@@ -1,6 +1,6 @@
 <b><h1 align="center">HIVE</h1></b>
 
-<h2>Requirements:</h2>
+<h2>:white_check_mark: Requirements:</h2>
 
 - Python 3.7.8 64 bit
 - numpy==1.18.5
