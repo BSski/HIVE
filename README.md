@@ -1,6 +1,7 @@
 <b><h1 align="center">HIVE</h1></b>
 
 <h2>Requirements:</h2>
+
 - Python 3.7.8 64 bit
 - numpy==1.18.5
 - pygame==1.9.6
@@ -12,7 +13,6 @@
 - Keras==2.4.3
 - rl==3.0
 - theano==1.0.5
-
 
 
 <h2>:chart_with_upwards_trend: Changelog:</h2>
