@@ -37,7 +37,7 @@ Platform created to facilitate conducting spatial multi-agent iterated prisoner'
 
 :date: 03.12.2020
 - using DDPG instead of DQN now
-- agents have parameters which impact their actions
+- agents have parameters that impact their actions
 
 :date: 21.11.2020
 - agents now exist on 2d 43x43 plane and interact when on the same tile
@@ -46,7 +46,7 @@ Platform created to facilitate conducting spatial multi-agent iterated prisoner'
 :date: 04.11.2020
 - more than two players can play now (interleaved training)
 - added 7 NPCs with popular PD strategies
-- players now include current episode step and type of an enemy in their observations
+- players now include current episode step and type of the enemy in their observations
 
 :date: 28.10.2020
 - created stable, developable version of two neural nets playing PD against each other using:
