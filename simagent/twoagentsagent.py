@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import warnings
 from copy import deepcopy
+import datetime
 
 import numpy as np
 import matplotlib.pyplot as pp
@@ -135,7 +136,7 @@ class TwoAgentsAgent(object):
                   player = None, player_one = None, agent_index = None, agent_one_index = None,
                   parameters = [], parameters_one = []):
             try:
-                print(player, player_one, parameters, parameters_one)
+                ## print(player, player_one, parameters, parameters_one)
                 for i_step in range(20):
                     if observation is None:  # start of a new episode
                         callbacks.on_episode_begin(episode)
@@ -161,20 +162,22 @@ class TwoAgentsAgent(object):
                     callbacks.on_step_begin(episode_step)
                     # This is where all of the work happens. We first perceive and compute the action
                     # (forward step) and then use the reward to improve (backward step).
-                    #action = self.forward_test(observation,
-                                              # player,
-                                              # player_one,
-                                              # agent_index,
-                                              # agent_one_index
-                                              # )
+                    action = self.forward_test(observation,
+                                              player,
+                                              player_one,
+                                              agent_index,
+                                              agent_one_index
+                                              )
                     # if self.processor is not None:
                         # action = self.processor.process_action(action)
-                    action = [1,1]
-                    # Parameters impact.
-                    print("actions before parameters:", action)
-                    #action[0] = (action[0] + (0.05 * parameters[0]))*(1-(parameters[1]*0.05))
-                    #action[1] = (action[1] + (0.05 * parameters_one[0]))*(1-(parameters_one[1]*0.05))
 
+                    # Parameters impact.
+                    #print("actions before parameters:", action)
+                    ## print(parameters[0], parameters_one[0])
+                    ## print("PRE PARAMETER:", action[0], action[1])
+                    ## # action[0] = (action[0] + 9*(0.16 * parameters[0]))
+                    ## # action[1] = (action[1] + 9*(0.16 * parameters_one[0]))
+                    ## print("POST PARAMETER:", action[0], action[1])
 
                     reward = [0, 0]
                     accumulated_info = {}
@@ -202,11 +205,10 @@ class TwoAgentsAgent(object):
                     # nb_max_episode_steps was there, but it's gone now, since I'm doing that in env #
 
                     #metrics, metrics1 = self.backward_test(reward, terminal=done)
-                    metrics = 0,0,0
-                    metrics1 = 0,0,0
+                    metrics, metrics1 = [0,0,0], [0,0,0]
                     episode_reward[0] += reward[0]
                     episode_reward[1] += reward[1]
-                    print("### episode_reward", episode_reward)
+                    ## print("### episode_reward", episode_reward)
                     step_logs = {
                         'action': action[0],
                         'action1': action[1],
@@ -228,12 +230,12 @@ class TwoAgentsAgent(object):
                         # resetting the environment. We need to pass in `terminal=False` here since
                         # the *next* state, that is the state of the newly reset environment, is
                         # always non-terminal by convention.
-                        #self.forward_test(observation,
-                                          #player,
-                                          ##player_one,
-                                         # agent_index,
-                                         # agent_one_index
-                                         # )
+                        self.forward_test(observation,
+                                          player,
+                                          player_one,
+                                          agent_index,
+                                          agent_one_index
+                                          )
                         #self.backward_test([0, 0], terminal=False)
 
                         # This episode is finished, report and reset.
@@ -273,9 +275,7 @@ class TwoAgentsAgent(object):
         font2 = pygame.font.SysFont("liberationmono", 12)
         font3 = pygame.font.SysFont("liberationmono", 11)
         font4 = pygame.font.SysFont("humorsans", 70)
-        font5 = pygame.font.SysFont("liberationmono", 12)
-        font6 = pygame.font.SysFont("liberationmono", 14)
-        font7 = pygame.font.SysFont("liberationmono", 18)
+        font5 = pygame.font.SysFont("liberationmono", 18)
 
         # Defining colors.
         BLACK       = (   0,   0,   0)
@@ -292,42 +292,27 @@ class TwoAgentsAgent(object):
         BLUE        = (   0, 102, 204)
         RED         = ( 255,  77,  77)
 
-        # Load images.
-        PLUS_UP = pygame.image.load("sprites/plus_up.png")
-        PLUS_DOWN = pygame.image.load("sprites/plus_down.png")
-        MINUS_UP = pygame.image.load("sprites/minus_up.png")
-        MINUS_DOWN = pygame.image.load("sprites/minus_up.png")
-        RESET_UP = pygame.image.load("sprites/reset_up.png")
-        RESET_DOWN = pygame.image.load("sprites/reset_down.png")
-        START_UP = pygame.image.load("sprites/start_up.png")
-        START_DOWN = pygame.image.load("sprites/start_down.png")
-        PAUSE_UP = pygame.image.load("sprites/pause_up.png")
-        PAUSE_DOWN = pygame.image.load("sprites/pause_down.png")
-
         animation = "|/-\\"
 
         carnivores = []
-        btn_tempo_plus_clicked = 0
-        btn_tempo_minus_clicked = 0
 
         tempo = 1                  # between 0.01 and 1    # default = 0.28
         counter = 0
         counter_prev = counter
         counter_for_fps = 0
-        total_cycles_counter = 0
 
         big_counter = 0
         big_counter_prev = big_counter
         pause = 0
-        chosen_cycles_per_second = 0
+        chosen_cycles_per_second = 5
         cycles_per_sec_list = [30, 60, 90, 120, 150, 180, 240, 300, 360, 450, 600, 720, 900, 1200]
         cycles_per_sec_dividers_list = [1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40]
         fights_queue = []
         agents_fighting_queue = set()
-        grid_size = 45  # max amount of agents = (grid_size-2)^2, if you exceed, they won't have space to spawn, max 43
+        grid_size = 43  # max amount of agents = (grid_size-2)^2, if you exceed, they won't have space to spawn, max 43
         fight_flag = 0
         sum_of_cash_for_hives = []
-        amount_of_games_to_log = 20
+        amount_of_games_to_log = 1000
         debug_controllable_agent_present = debug_agent
 
         hives_balance_against = [
@@ -345,23 +330,8 @@ class TwoAgentsAgent(object):
         def draw_window():
             logo = font4.render("H I V E", True, (80, 80, 80))
             screen.blit(logo, (28, 18))
-            signature = font3.render("bsski 2020", True, (200, 200, 200))
+            signature = font3.render("bsski 2021", True, (200, 200, 200))
             screen.blit(signature, (70, 60))
-            """
-            # Drawing grid.
-            square = 10
-            square_width = square
-            square_height = square
-            y = -square_height + 10
-            for i in range(0, grid_size):
-                y += square_height
-                x = -square_width + 213
-                for j in range(0, grid_size):
-                    x += square_width
-                    pygame.draw.rect(screen, GRAY, [x, y, square_width-1, square_height-1])
-            """
-            # Charts backgrounds.
-            # pygame.draw.rect(screen, GRAY, [860, 44, 176, 6])
 
             # Generate hex map.
             x = 213
@@ -390,8 +360,6 @@ class TwoAgentsAgent(object):
                         pygame.draw.line(screen, GRAY, (x+1+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+7), (x+6+1+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+7), 1)
                         pygame.draw.line(screen, GRAY, (x+2+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+8), (x+4+2+(10*i)+(shift*10), y+((j-int(diameter/2))*9)-1+8), 1)
 
-            ###
-
             for i in boundary_tiles:
                 pygame.draw.line(screen, DARKGRAY, (grid_hex[i[1]][i[0]][0]+2, grid_hex[i[1]][i[0]][1]), (grid_hex[i[1]][i[0]][0]+2+4, grid_hex[i[1]][i[0]][1]), 1)
                 pygame.draw.line(screen, DARKGRAY, (grid_hex[i[1]][i[0]][0]+1, grid_hex[i[1]][i[0]][1]+1), (grid_hex[i[1]][i[0]][0]+1+6, grid_hex[i[1]][i[0]][1]+1), 1)
@@ -399,60 +367,12 @@ class TwoAgentsAgent(object):
                 pygame.draw.line(screen, DARKGRAY, (grid_hex[i[1]][i[0]][0]+1, grid_hex[i[1]][i[0]][1]+7), (grid_hex[i[1]][i[0]][0]+1+6, grid_hex[i[1]][i[0]][1]+7), 1)
                 pygame.draw.line(screen, DARKGRAY, (grid_hex[i[1]][i[0]][0]+2, grid_hex[i[1]][i[0]][1]+8), (grid_hex[i[1]][i[0]][0]+2+4, grid_hex[i[1]][i[0]][1]+8), 1)
 
-            ###
-
             # Main interface lines.
             pygame.draw.line(screen, GRAY, (12, 12), (12, 657), 1)
             pygame.draw.line(screen, GRAY, (198, 12), (198, 436), 1)
             pygame.draw.line(screen, GRAY, (656, 12), (656, 436), 1)
             pygame.draw.line(screen, GRAY, (847, 12), (847, 657), 1)
 
-            icons_div = 88
-            # Hive 1 icon.
-            pygame.draw.rect(screen, ( 255, 255, 255), [25 , (icons_div+15*0), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*0)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(nb_agents_in_hives[0]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*0))
-            # Hive 2 icon.
-            pygame.draw.rect(screen, ( 255,   0,   0), [25, (icons_div+15*1), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*1)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(nb_agents_in_hives[1]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*1))
-            # Hive 3 icon.
-            pygame.draw.rect(screen, (   0, 255,   0), [25, (icons_div+15*2), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*2)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(nb_agents_in_hives[2]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*2))
-            # Hive 4 icon.
-            pygame.draw.rect(screen, (   0,   0, 255), [25, (icons_div+15*3), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*3)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(nb_agents_in_hives[3]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*3))
-            # Hive 5 icon.
-            pygame.draw.rect(screen, ( 255, 255,   0), [25, (icons_div+15*4), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*4)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(nb_agents_in_hives[4]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*4))
-            # Hive 6 icon.
-            pygame.draw.rect(screen, (   0, 255, 255), [25, (icons_div+15*5), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*5)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(nb_agents_in_hives[5]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*5))
-            # Hive 7 icon.
-            pygame.draw.rect(screen, ( 255,   0, 255), [25, (icons_div+15*6), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*6)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(nb_agents_in_hives[6]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*6))
-            # Hive 8 icon.
-            pygame.draw.rect(screen, ( 128, 128,   0), [25, (icons_div+15*7), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*7)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(nb_agents_in_hives[7]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*7))
-            # Hive 9 icon.
-            pygame.draw.rect(screen, (   0, 128,   0), [25, (icons_div+15*8), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*8)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(nb_agents_in_hives[8]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*8))
 
 
 
@@ -466,55 +386,24 @@ class TwoAgentsAgent(object):
                 #print("SUM:", sum_of_cash_for_hives)
                 sum_of_cash_for_hives = temp_sum_of_cash_for_hives
 
-
+            # Drawing amount of agents present for each hive and hives' balances.
             icons_div = 88
-            # Hive 1 icon.
-            pygame.draw.rect(screen, ( 255, 255, 255), [25 , (icons_div+15*10), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*10)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(sum_of_cash_for_hives[0]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*10))
-            # Hive 2 icon.
-            pygame.draw.rect(screen, ( 255,   0,   0), [25, (icons_div+15*11), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*11)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(sum_of_cash_for_hives[1]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*11))
-            # Hive 3 icon.
-            pygame.draw.rect(screen, (   0, 255,   0), [25, (icons_div+15*12), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*12)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(sum_of_cash_for_hives[2]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*12))
-            # Hive 4 icon.
-            pygame.draw.rect(screen, (   0,   0, 255), [25, (icons_div+15*13), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*13)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(sum_of_cash_for_hives[3]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*13))
-            # Hive 5 icon.
-            pygame.draw.rect(screen, ( 255, 255,   0), [25, (icons_div+15*14), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*14)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(sum_of_cash_for_hives[4]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*14))
-            # Hive 6 icon.
-            pygame.draw.rect(screen, (   0, 255, 255), [25, (icons_div+15*15), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*15)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(sum_of_cash_for_hives[5]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*15))
-            # Hive 7 icon.
-            pygame.draw.rect(screen, ( 255,   0, 255), [25, (icons_div+15*16), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*16)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(sum_of_cash_for_hives[6]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*16))
-            # Hive 8 icon.
-            pygame.draw.rect(screen, ( 128, 128,   0), [25, (icons_div+15*17), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*17)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(sum_of_cash_for_hives[7]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*17))
-            # Hive 9 icon.
-            pygame.draw.rect(screen, (   0, 128,   0), [25, (icons_div+15*18), 9, 9])
-            pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*18)-1, 11, 11], 1)
-            text_to_blit = font2.render(str(sum_of_cash_for_hives[8]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (38, icons_div+15*18))
+            hive_icons_colors = [( 255, 255, 255), ( 255,   0,   0), (   0, 255,   0),
+                                 (   0,   0, 255), ( 255, 255,   0), (   0, 255, 255),
+                                 ( 255,   0, 255), ( 128, 128,   0), (   0, 128,   0)]
+            for i in range(0, 9):
+                # Drawing amount of agents present for each hive.
+                pygame.draw.rect(screen, hive_icons_colors[i], [25 , (icons_div+15*i), 9, 9])
+                pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*i)-1, 11, 11], 1)
+                text_to_blit = font2.render(str(nb_agents_in_hives[i]), True, (50, 50, 50))
+                screen.blit(text_to_blit, (38, icons_div+15*i))
+                # Drawing hives' balances.
+                pygame.draw.rect(screen, hive_icons_colors[i], [25 , (icons_div+15*(10+i)), 9, 9])
+                pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*(10+i))-1, 11, 11], 1)
+                text_to_blit = font2.render(str(sum_of_cash_for_hives[i]), True, (50, 50, 50))
+                screen.blit(text_to_blit, (38, icons_div+15*(10+i)))
 
-
+            # Drawing hives' balances against each other table.
             table_interline = 18
             table_columns_width = 65
             table_starting_y = 460
@@ -523,114 +412,27 @@ class TwoAgentsAgent(object):
             pygame.draw.line(screen, DARKERGRAY, (table_starting_x, 460+table_interline*1.8), (table_starting_x+table_columns_width*7, 460+table_interline*1.8), 1)
             pygame.draw.line(screen, DARKERGRAY, (table_starting_x+table_columns_width*0.5, 460+table_interline*1.2), (table_starting_x+table_columns_width*0.5, 460+table_interline*8), 1)
 
-            text_to_blit = font2.render("H1", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y +table_interline*2))
-            text_to_blit = font2.render("H2", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*3))
-            text_to_blit = font2.render("H3", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*4))
-            text_to_blit = font2.render("H4", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*5))
-            text_to_blit = font2.render("H5", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*6))
-            text_to_blit = font2.render("H6", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x+7, table_starting_y+table_interline*7))
+            # Drawing vertical H1-H7 of the table.
+            for i in range(2, 8):
+                text_to_blit = font2.render(f'H{i-1}', True, (50, 50, 50))
+                screen.blit(text_to_blit, (table_starting_x+7, table_starting_y +table_interline*i))
 
-            table_starting_x = table_starting_x+table_columns_width
-            text_to_blit = font2.render("H1", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
-            text_to_blit = font2.render("-", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
-            text_to_blit = font2.render(str(hives_balance_against[0][1]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
-            text_to_blit = font2.render(str(hives_balance_against[0][2]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
-            text_to_blit = font2.render(str(hives_balance_against[0][3]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
-            text_to_blit = font2.render(str(hives_balance_against[0][4]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
-            text_to_blit = font2.render(str(hives_balance_against[0][5]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
+            # Drawing horizontal H1-H7 of the table and content of the table.
+            for i in range(0, 6):
+                table_starting_x += table_columns_width
+                text_to_blit = font2.render(f'H{i+1}', True, (50, 50, 50))
+                screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
+                for j in range(2, 8):
+                    if j-2 == i:
+                        text_to_blit = font2.render("-", True, (50, 50, 50))
+                        screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*j))
+                    else:
+                        text_to_blit = font2.render(str(hives_balance_against[i][j-2]), True, (50, 50, 50))
+                        screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*j))
 
-            table_starting_x = table_starting_x+table_columns_width
-            text_to_blit = font2.render("H2", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
-            text_to_blit = font2.render(str(hives_balance_against[1][0]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
-            text_to_blit = font2.render("-", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
-            text_to_blit = font2.render(str(hives_balance_against[1][2]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
-            text_to_blit = font2.render(str(hives_balance_against[1][3]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
-            text_to_blit = font2.render(str(hives_balance_against[1][4]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
-            text_to_blit = font2.render(str(hives_balance_against[1][5]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
 
-            table_starting_x = table_starting_x+table_columns_width
-            text_to_blit = font2.render("H3", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
-            text_to_blit = font2.render(str(hives_balance_against[2][0]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
-            text_to_blit = font2.render(str(hives_balance_against[2][1]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
-            text_to_blit = font2.render("-", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
-            text_to_blit = font2.render(str(hives_balance_against[2][3]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
-            text_to_blit = font2.render(str(hives_balance_against[2][4]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
-            text_to_blit = font2.render(str(hives_balance_against[2][5]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
-
-            table_starting_x = table_starting_x+table_columns_width
-            text_to_blit = font2.render("H4", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
-            text_to_blit = font2.render(str(hives_balance_against[3][0]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
-            text_to_blit = font2.render(str(hives_balance_against[3][1]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
-            text_to_blit = font2.render(str(hives_balance_against[3][2]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
-            text_to_blit = font2.render("-", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
-            text_to_blit = font2.render(str(hives_balance_against[3][4]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
-            text_to_blit = font2.render(str(hives_balance_against[3][5]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
-
-            table_starting_x = table_starting_x+table_columns_width
-            text_to_blit = font2.render("H5", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
-            text_to_blit = font2.render(str(hives_balance_against[4][0]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
-            text_to_blit = font2.render(str(hives_balance_against[4][1]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
-            text_to_blit = font2.render(str(hives_balance_against[4][2]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
-            text_to_blit = font2.render(str(hives_balance_against[4][3]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
-            text_to_blit = font2.render("-", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
-            text_to_blit = font2.render(str(hives_balance_against[4][5]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
-
-            table_starting_x = table_starting_x+table_columns_width
-            text_to_blit = font2.render("H6", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
-            text_to_blit = font2.render(str(hives_balance_against[5][0]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*2))
-            text_to_blit = font2.render(str(hives_balance_against[5][1]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*3))
-            text_to_blit = font2.render(str(hives_balance_against[5][2]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*4))
-            text_to_blit = font2.render(str(hives_balance_against[5][3]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*5))
-            text_to_blit = font2.render(str(hives_balance_against[5][4]), True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*6))
-            text_to_blit = font2.render("-", True, (50, 50, 50))
-            screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*7))
+            text_to_blit = font2.render("total episodes played: " + str(episode), True, (50, 50, 50))
+            screen.blit(text_to_blit, (19, 615))
 
             text_to_blit = font2.render("exit after this sim.? (backspace): " + str(self.exit_after_this_sim), True, (50, 50, 50))
             screen.blit(text_to_blit, (19, 645))
@@ -701,32 +503,85 @@ class TwoAgentsAgent(object):
 
             # Draw the animal on the screen.
             def draw(self):
-                pygame.draw.line(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]), (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]), 1)
-                pygame.draw.line(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+1-1, grid_hex[self.coord_y][self.coord_x][1]+2), (grid_hex[self.coord_y][self.coord_x][0]+1-1, grid_hex[self.coord_y][self.coord_x][1]+6), 1)
-                pygame.draw.line(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+1+7, grid_hex[self.coord_y][self.coord_x][1]+2), (grid_hex[self.coord_y][self.coord_x][0]+1+7, grid_hex[self.coord_y][self.coord_x][1]+6), 1)
-                pygame.draw.line(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]+8), (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]+8), 1)
-                pygame.draw.rect(screen, self.colors_dict[self.hive][0], [grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1, 7, 7])
+                pygame.draw.line(screen, self.colors_dict[self.hive][1],
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]),
+                                 1)
+                pygame.draw.line(screen, self.colors_dict[self.hive][1],
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1-1, grid_hex[self.coord_y][self.coord_x][1]+2),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1-1, grid_hex[self.coord_y][self.coord_x][1]+6),
+                                 1)
+                pygame.draw.line(screen, self.colors_dict[self.hive][1],
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1+7, grid_hex[self.coord_y][self.coord_x][1]+2),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1+7, grid_hex[self.coord_y][self.coord_x][1]+6),
+                                 1)
+                pygame.draw.line(screen, self.colors_dict[self.hive][1],
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]+8),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]+8),
+                                 1)
+                pygame.draw.rect(screen, self.colors_dict[self.hive][0],
+                                 [grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1, 7, 7])
 
-                pygame.draw.circle(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1), 0)
-                pygame.draw.circle(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+1), 0)
-                pygame.draw.circle(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+7), 0)
-                pygame.draw.circle(screen, self.colors_dict[self.hive][1], (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+7), 0)
-                pygame.draw.circle(screen, GRAY, (grid_hex[self.coord_y][self.coord_x][0]+6, grid_hex[self.coord_y][self.coord_x][1]+2), 0)
-                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8-8), 0)
+                pygame.draw.circle(screen, self.colors_dict[self.hive][1],
+                                   (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1),
+                                   0)
+                pygame.draw.circle(screen, self.colors_dict[self.hive][1],
+                                   (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+1),
+                                   0)
+                pygame.draw.circle(screen, self.colors_dict[self.hive][1],
+                                   (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+7),
+                                   0)
+                pygame.draw.circle(screen, self.colors_dict[self.hive][1],
+                                   (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+7),
+                                   0)
+                pygame.draw.circle(screen, GRAY,
+                                   (grid_hex[self.coord_y][self.coord_x][0]+6, grid_hex[self.coord_y][self.coord_x][1]+2),
+                                   0)
+                pygame.draw.circle(screen, DARKERGRAY,
+                                   (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8-8),
+                                   0)
 
                 # Draw its border.
-                pygame.draw.line(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]-1), (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]-1), 1)
-                pygame.draw.line(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+1-2, grid_hex[self.coord_y][self.coord_x][1]+2), (grid_hex[self.coord_y][self.coord_x][0]+1-2, grid_hex[self.coord_y][self.coord_x][1]+6), 1)
-                pygame.draw.line(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+1+10-2, grid_hex[self.coord_y][self.coord_x][1]+2), (grid_hex[self.coord_y][self.coord_x][0]+1+10-2, grid_hex[self.coord_y][self.coord_x][1]+6), 1)
-                pygame.draw.line(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]+8+1), (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]+8+1), 1)
-                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2-2, grid_hex[self.coord_y][self.coord_x][1]+8-7), 0)
-                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2-1, grid_hex[self.coord_y][self.coord_x][1]+8-8), 0)
-                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8-8), 0)
-                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+6, grid_hex[self.coord_y][self.coord_x][1]+8-7), 0)
-                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8+0), 0)
-                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2+6, grid_hex[self.coord_y][self.coord_x][1]+8-1), 0)
-                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2-1, grid_hex[self.coord_y][self.coord_x][1]+8+0), 0)
-                pygame.draw.circle(screen, DARKERGRAY, (grid_hex[self.coord_y][self.coord_x][0]+2-2, grid_hex[self.coord_y][self.coord_x][1]+8-1), 0)
+                pygame.draw.line(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]-1),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]-1),
+                                 1)
+                pygame.draw.line(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1-2, grid_hex[self.coord_y][self.coord_x][1]+2),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1-2, grid_hex[self.coord_y][self.coord_x][1]+6),
+                                 1)
+                pygame.draw.line(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1+10-2, grid_hex[self.coord_y][self.coord_x][1]+2),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1+10-2, grid_hex[self.coord_y][self.coord_x][1]+6),
+                                 1)
+                pygame.draw.line(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]+8+1),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]+8+1),
+                                 1)
+                pygame.draw.circle(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2-2, grid_hex[self.coord_y][self.coord_x][1]+8-7),
+                                 0)
+                pygame.draw.circle(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2-1, grid_hex[self.coord_y][self.coord_x][1]+8-8),
+                                 0)
+                pygame.draw.circle(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8-8),
+                                 0)
+                pygame.draw.circle(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2+6, grid_hex[self.coord_y][self.coord_x][1]+8-7),
+                                 0)
+                pygame.draw.circle(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8+0),
+                                 0)
+                pygame.draw.circle(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2+6, grid_hex[self.coord_y][self.coord_x][1]+8-1),
+                                 0)
+                pygame.draw.circle(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2-1, grid_hex[self.coord_y][self.coord_x][1]+8+0),
+                                 0)
+                pygame.draw.circle(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+2-2, grid_hex[self.coord_y][self.coord_x][1]+8-1),
+                                 0)
 
             # Move the animal in the positions list and change its coordinates.
             def move(self):
@@ -744,7 +599,7 @@ class TwoAgentsAgent(object):
                         if not [self.coord_x, self.coord_y] in boundary_tiles:
                             self.possible_moves.remove(self.forbidden_move)  # hash it if you want random movement
                             move = random.choice(self.possible_moves)
-                            print(self.index, move, self.hive, " |||||", self.possible_moves, "|||||", self.forbidden_move)
+                            #print(self.index, move, self.hive, " |||||", self.possible_moves, "|||||", self.forbidden_move)
                             if self.coord_y > int(diameter/2):
                                 if move == "e":
                                     self.coord_x += 1
@@ -810,15 +665,12 @@ class TwoAgentsAgent(object):
                                     self.forbidden_move = "se"
 
                             if self.coord_x == pre_previous_coord_x and self.coord_y == pre_previous_coord_y:
-                                print("####### WLASNIE ZAPOBIEGNIETO COFNIECIU SIE####################################################")
+                                #print("####### WLASNIE ZAPOBIEGNIETO COFNIECIU SIE #######")
                                 self.coord_x = self.previous_coord_x
                                 self.coord_y = self.previous_coord_y
                         else:
                             self.coord_x = pre_previous_coord_x
                             self.coord_y = pre_previous_coord_y
-
-                            # how to forbid from moving to previous tile?
-
 
                         self.possible_moves = ["e", "w", "sw", "se", "nw", "ne"]
                         try:
@@ -838,73 +690,51 @@ class TwoAgentsAgent(object):
                                                     random.randint(-3,3)])
 
             def move(self):
-                #carnivores_pos_hex[self.coord_y][self.coord_x] = \
-                    #carnivores_pos_hex[self.coord_y][self.coord_x][1:]
-
                 if self.coord_y > int(diameter/2):
                     if self.move_to_do == "e":
                         self.coord_x += 1
-                        self.forbidden_move = "w"
                     elif self.move_to_do == "w":
                         self.coord_x -= 1
-                        self.forbidden_move = "e"
                     elif self.move_to_do == "sw":
                         self.coord_x -= 1
                         self.coord_y += 1
-                        self.forbidden_move = "ne"
                     elif self.move_to_do == "se":
                         self.coord_y += 1
-                        self.forbidden_move = "nw"
                     elif self.move_to_do == "ne":
                         self.coord_x += 1
                         self.coord_y -= 1
-                        self.forbidden_move = "sw"
                     elif self.move_to_do == "nw":
                         self.coord_y -= 1
-                        self.forbidden_move = "se"
                 elif self.coord_y < int(diameter/2):
                     if self.move_to_do == "e":
                         self.coord_x += 1
-                        self.forbidden_move = "w"
                     elif self.move_to_do == "w":
                         self.coord_x -= 1
-                        self.forbidden_move = "e"
                     elif self.move_to_do == "sw":
                         self.coord_y += 1
-                        self.forbidden_move = "ne"
                     elif self.move_to_do == "se":
                         self.coord_y += 1
                         self.coord_x += 1
-                        self.forbidden_move = "nw"
                     elif self.move_to_do == "ne":
                         self.coord_y -= 1
-                        self.forbidden_move = "sw"
                     elif self.move_to_do == "nw":
                         self.coord_y -= 1
                         self.coord_x -= 1
-                        self.forbidden_move = "se"
                 else:  # self.coord_y == diameter-1
                     if self.move_to_do == "e":
                         self.coord_x += 1
-                        self.forbidden_move = "w"
                     elif self.move_to_do == "w":
                         self.coord_x -= 1
-                        self.forbidden_move = "e"
                     elif self.move_to_do == "sw":
                         self.coord_x -= 1
                         self.coord_y += 1
-                        self.forbidden_move = "ne"
                     elif self.move_to_do == "se":
                         self.coord_y += 1
-                        self.forbidden_move = "nw"
                     elif self.move_to_do == "ne":
                         self.coord_y -= 1
-                        self.forbidden_move = "sw"
                     elif self.move_to_do == "nw":
                         self.coord_x -= 1
                         self.coord_y -= 1
-                        self.forbidden_move = "se"
-
                 if self.coord_y > len(grid_hex)-1:
                     self.coord_y = 0
                 if self.coord_x > len(grid_hex[self.coord_y])-1:
@@ -915,9 +745,6 @@ class TwoAgentsAgent(object):
                     self.coord_x = len(grid_hex[self.coord_y])-1
 
                 self.move_to_do = ""
-                #carnivores_pos_hex[self.coord_y][self.coord_x].append(1)
-
-
 
         # Spawn a new carnivore.
         def spawn_carnivore(amount, hive):
@@ -927,30 +754,15 @@ class TwoAgentsAgent(object):
                 pos_y = random.randint(1, grid_size-2)
                 if len(carnivores_pos_hex[pos_y][pos_x]) < 1:
                     carnivores.append(Carnivore(pos_x, pos_y, len(carnivores), hive, [
-                                                      random.randint(-3,3),
-                                                      random.randint(-3,3),
-                                                      random.randint(-3,3),
-                                                      random.randint(-3,3)]))
-                    carnivores_pos_hex[pos_y][pos_x].append(1)
-                    amount_left_to_spawn -= 1
-
-        # Spawn a new carnivore but with different parameters setting.
-        def spawn_barnivore(amount, hive):
-            amount_left_to_spawn = amount
-            while amount_left_to_spawn != 0:
-                pos_x = random.randint(1, int(grid_size/2))
-                pos_y = random.randint(1, grid_size-2)
-                if len(carnivores_pos_hex[pos_y][pos_x]) < 1:
-                    carnivores.append(Carnivore(pos_x, pos_y, len(carnivores), hive, [
-                                                      random.randint(0,1),
-                                                      random.randint(0,1),
-                                                      random.randint(0,1),
-                                                      random.randint(0,1)]))
+                                                      random.randint(-3, 3),
+                                                      random.randint(-3, 3),
+                                                      random.randint(-3, 3),
+                                                      random.randint(-3, 3)]))
                     carnivores_pos_hex[pos_y][pos_x].append(1)
                     amount_left_to_spawn -= 1
 
         # Spawn agents.
-        for i in range(0,9):
+        for i in range(0, 9):
             spawn_carnivore(nb_agents_in_hives[i], i)
 
         # Create list of hives present in current simulation.
@@ -958,14 +770,14 @@ class TwoAgentsAgent(object):
         for i in range(len(nb_agents_in_hives)):
             if nb_agents_in_hives[i] != 0:
                 hives_present_in_current_sim.append(i)
-        print("hives_present_in_current_sim:", hives_present_in_current_sim)
+        ## print("hives_present_in_current_sim:", hives_present_in_current_sim)
 
         # Create controllable agent
         if debug_controllable_agent_present == 1:
             controllable_agent = ControllableAgent()
 
 
-        want_rewards_visualisation = 0
+        wants_rewards_visualisation = 0
         n = self.get_n()  # amount of agent types in the current simulation
         # ################################# #
         # ##-------- PYGAME LOOP --------## #
@@ -986,7 +798,7 @@ class TwoAgentsAgent(object):
                         else:
                             pause = 1
                     if event.key == pygame.K_LEFT:
-                        want_rewards_visualisation = 1
+                        wants_rewards_visualisation = 1
                     if event.key == pygame.K_BACKSPACE:
                         if self.exit_after_this_sim == 0:
                             self.exit_after_this_sim = 1
@@ -1005,6 +817,7 @@ class TwoAgentsAgent(object):
                             controllable_agent.move_to_do = "sw"
                         elif event.key == pygame.K_g:
                             controllable_agent.move_to_do = "w"
+
             # Increase /counter/ with a step of a size of /tempo/ every frame,
             # if simulation isn't paused. If /counter/ is bigger than 120,
             # reset it, and increase /big_counter/ by 1.
@@ -1030,27 +843,29 @@ class TwoAgentsAgent(object):
                         episode_reward, episode_step, observation, episode, did_abort = fight(self, env, action_repetition, callbacks, nb_max_start_steps,
                         start_step_policy, nb_max_episode_steps, episode_reward, episode_step, observation, episode, did_abort,
                         fights_queue[i][0], fights_queue[i][1], fights_queue[i][2], fights_queue[i][3], fights_queue[i][4], fights_queue[i][5])
-                        print("baba", episode_reward)
-                        print("account before:", carnivores[fights_queue[i][2]].account, "::", fights_queue[i][2])
+                        ## print("episode_reward", episode_reward)
+                        ## print("account before:", carnivores[fights_queue[i][2]].account, "::", fights_queue[i][2])
                         carnivores[fights_queue[i][2]].account += episode_reward[0]
-                        print("account after:", carnivores[fights_queue[i][2]].account, "::", fights_queue[i][2])
-                        print("account1 before:", carnivores[fights_queue[i][3]].account, "::", fights_queue[i][3])
+                        ## print("account after:", carnivores[fights_queue[i][2]].account, "::", fights_queue[i][2])
+                        ## print("account1 before:", carnivores[fights_queue[i][3]].account, "::", fights_queue[i][3])
                         carnivores[fights_queue[i][3]].account += episode_reward[1]
-                        print("account1 after:", carnivores[fights_queue[i][3]].account, "::", fights_queue[i][3])
-                        print("######################################################################")
-                        print("######################################################################")
+                        ## print("account1 after:", carnivores[fights_queue[i][3]].account, "::", fights_queue[i][3])
+                        ## print("#####################################\n#####################################")
 
                         # Adding episode rewards to rewards_history.
-                        if fights_queue[i][0] == fights_queue[i][1]:
-                            self.rewards_history[fights_queue[i][0]][fights_queue[i][1]].append((episode_reward[0] + episode_reward[1])/2)
+                        fighter_one = fights_queue[i][0]
+                        fighter_two = fights_queue[i][1]
+                        if fighter_one == fighter_two:
+                            # If fighters are from the same hive:
+                            self.rewards_history[fighter_one][fighter_two].append((episode_reward[0] + episode_reward[1])/2)
                         else:
-                            self.rewards_history[fights_queue[i][0]][fights_queue[i][1]].append(episode_reward[0])
-                            carnivores[fights_queue[i][2]].balance_against[fights_queue[i][1]] += episode_reward[0]
-                            hives_balance_against[fights_queue[i][0]][fights_queue[i][1]] += episode_reward[0]
-                            hives_balance_against[fights_queue[i][1]][fights_queue[i][0]] += episode_reward[1]
-                            self.rewards_history[fights_queue[i][1]][fights_queue[i][0]].append(episode_reward[1])
-                            carnivores[fights_queue[i][3]].balance_against[fights_queue[i][0]] += episode_reward[1]
-
+                            # If fighters are from different hives:
+                            self.rewards_history[fighter_one][fighter_two].append(episode_reward[0])
+                            carnivores[fights_queue[i][2]].balance_against[fighter_two] += episode_reward[0]
+                            hives_balance_against[fighter_one][fighter_two] += episode_reward[0]
+                            hives_balance_against[fighter_two][fighter_one] += episode_reward[1]
+                            self.rewards_history[fighter_two][fighter_one].append(episode_reward[1])
+                            carnivores[fights_queue[i][3]].balance_against[fighter_one] += episode_reward[1]
                     fights_queue = []
                     fight_flag = 0
 
@@ -1061,13 +876,14 @@ class TwoAgentsAgent(object):
 
                 # Animation to prevent Windows from hanging the window when paused.
                 # Also useful in approximating lag.
-                text_to_blit = font7.render(animation[0], True, (50, 50, 50))
+                text_to_blit = font5.render(animation[0], True, (50, 50, 50))
                 screen.blit(text_to_blit, (847, 651))
                 animation = animation + animation[0]
                 animation = animation[1:]
 
+
             # Create reward charts on demand (left arrow button).
-            if want_rewards_visualisation == 1:
+            if wants_rewards_visualisation == 1:
                 # Smaller number first.
                 print("1: DQN_one\n2: DQN_two\n3: AlwaysCoop\n4: AlwaysDefect\n5: GRIM\n6: Imperfect TFT\n7: Random\n8: Suspicious TFT\n9: Tit For Tat")
                 x = input("\nWhich agent do you want to see fight?: ")
@@ -1077,29 +893,29 @@ class TwoAgentsAgent(object):
                     print("1: DQN_one\n2: DQN_two\n3: AlwaysCoop\n4: AlwaysDefect\n5: GRIM\n6: Imperfect TFT\n7: Random\n8: Suspicious TFT\n9: Tit For Tat")
                     x = input("\nWhich agent do you want to see fight?: ")
                     y = input("Who will be the opponent?: ")
-                x = int(x)-1
-                y = int(y)-1
+                x = int(x) - 1
+                y = int(y) - 1
                 if x > -1 and y > -1 and x < n and y < n:
                     pp.plot(self.rewards_history[x][y])
                     pp.ylim([-120, 480])
                     pp.show()
-                want_rewards_visualisation = 0
+                wants_rewards_visualisation = 0
 
 
-            """
             # Checking if all players played at least {amount_of_games_to_log} games.
-            if counter_for_fps % 180 == 0:
-                temp_counter = 0
+            if counter_for_fps % 120000 == 0:
+                self.save_weights('model.h5', overwrite=True)
+
+                not_enough_games_played_counter = 0
                 for i in hives_present_in_current_sim:
                     for j in hives_present_in_current_sim:
                         if len(self.rewards_history[i][j]) < amount_of_games_to_log and len(self.rewards_history[i][j]) > 0:
-                            temp_counter += 1
-                if temp_counter == 0:
+                            not_enough_games_played_counter += 1
+                if not_enough_games_played_counter == 0:
                     pygame_done = True
-            """
 
 
-            # "eat", then move.
+            # "Eat", then move.
             if not pause:
                 for i in carnivores:
                     i.move()
@@ -1113,21 +929,30 @@ class TwoAgentsAgent(object):
                 if counter_for_fps % cycles_per_sec_dividers_list[chosen_cycles_per_second] == 0:
                     controllable_agent.draw()
 
-            # check collisions and create fights.
+            # Check collisions and create fights (O(n^2), rethink the system).
             for j in carnivores:
                 if len(carnivores_pos_hex[j.coord_y][j.coord_x]) > 1:
+                    # If there is a carnivore who's standing on the same hex as someone else:
+                    # Let's find this "someone else":
                     for i in carnivores:
                         if j.get_coords()[0] == i.get_coords()[0] and j.get_coords()[1] == i.get_coords()[1]:
-                            if int(counter_prev) != int(counter) and int(counter) % 4 == 0:
-                                if j.index not in agents_fighting_queue and i.index not in agents_fighting_queue:
+                            # If the coords of both agents are the same:
+                            if int(counter_prev) != int(counter) and int(counter) % 4 == 0:  # maybe this could be put before both loops
+                                # Agents move every X frames, this 'if' makes sure there won't be X identical fights queued between moves.
+                                if not (j.index in agents_fighting_queue or i.index in agents_fighting_queue):
+                                    # If both agents are not present in the list of agents fighting in current queue:
                                     if j.index != i.index:
+                                        # If it's not the same agent:
                                         agents_fighting_queue.add(j.index)
                                         agents_fighting_queue.add(i.index)
                                         fights_queue.append([j.hive, i.hive, j.index, i.index, j.parameters, i.parameters])
                                         fight_flag = 1
                                         break
+            # Clear the list of agents fighting in this queue.
             agents_fighting_queue = set()
-            for i in fights_queue:  # swap the order of agents on the list so that smaller number is first (technical stuff)
+
+            # Swap the order of agents on the list so that smaller number is first (design detail).
+            for i in fights_queue:
                 if i[0] > i[1]:
                     i[0], i[1] = i[1], i[0]
 
@@ -1138,13 +963,13 @@ class TwoAgentsAgent(object):
         callbacks.on_train_end(logs={'did_abort': did_abort})
         self._on_train_end()
 
-        # After the simulation is done, append to .csv
+        # After the entire simulation is done, append to .csv
         for i in range(len(self.rewards_history)):
             for j in range(len(self.rewards_history[i])):
                 # Open our existing CSV file in append mode.
                 # Create a file object for this file.
                 file_name = 'csv output/{}.csv'.format([i,j])
-                print("file-name:", file_name)
+                print(datetime.datetime.now(), "Saving rewards_history to:", file_name)
                 with open(file_name, 'a') as f_object:
                     # Pass this file object to csv.writer()
                     # and get a writer object.
@@ -1162,7 +987,7 @@ class TwoAgentsAgent(object):
 
 
     def test(self, env, nb_episodes=1, action_repetition=1, callbacks=None, visualize=True,
-             nb_max_episode_steps=None, nb_max_start_steps=0, start_step_policy=None, verbose=1):
+            nb_max_episode_steps=None, nb_max_start_steps=0, start_step_policy=None, verbose=1):
         """Callback that is called before training begins.
         # Arguments
             env: (`Env` instance): Environment that the agent interacts with. See [Env](#env) for details.
@@ -1328,7 +1153,7 @@ class TwoAgentsAgent(object):
         return history
 
     def test_fight(self, env, nb_episodes=1, action_repetition=1, callbacks=None, visualize=True,
-             nb_max_episode_steps=None, nb_max_start_steps=0, start_step_policy=None, verbose=1, player = None, player_one = None):
+    nb_max_episode_steps=None, nb_max_start_steps=0, start_step_policy=None, verbose=1, player = None, player_one = None):
         """Callback that is called before training begins.
         # Arguments
             env: (`Env` instance): Environment that the agent interacts with. See [Env](#env) for details.

@@ -75,20 +75,20 @@ class SimultaneousAgent(TwoAgentsAgent):
             self.current_fight_number += 1
 
             # Print number of the pair playing right now / total number of pairs.
-            print(self.current_fight_number, "/", len(self.agents_combinations)-1)
+            ## print(self.current_fight_number, "/", len(self.agents_combinations)-1)
             self.current_fight = self.agents_combinations[self.current_fight_number]
             self.player = self.current_fight[0]
             self.player_one = self.current_fight[1]
 
-            print("####### AGENTS PLAYING:",self.player, self.player_one)
+            ## print("####### AGENTS PLAYING:",self.player, self.player_one)
             self.current_game[0].append([self.player, self.player_one])
             self.current_game[1].append([self.player_one, self.player])
 
             if self.current_fight_number == 0:
                 self.current_game_number += 1
 
-        print(observation[0], self.game_step, self.player_one, observation[3][1])
-        print(observation[1], self.game_step, self.player, observation[3][0])
+        ## print(observation[0], self.game_step, self.player_one, observation[3][1])
+        ## print(observation[1], self.game_step, self.player, observation[3][0])
 
         current_players_actions = [self.agents[self.player].forward([observation[0],
                                                                      self.game_step,
@@ -224,6 +224,7 @@ class SimultaneousAgent(TwoAgentsAgent):
             agent._on_test_end()
 
 
+
     def get_agents_games_log(self):
         return self.agents_games_log
 
@@ -236,25 +237,29 @@ class SimultaneousAgent(TwoAgentsAgent):
         self.game_step = observation[2]
 
         if self.game_step == -1:
-            print("####### HIVES PLAYING:", self.player, self.player_one)
-            print("####### AGENTS PLAYING:", agent_index, agent_one_index)
+            ## print("####### HIVES PLAYING:", self.player, self.player_one)
+            ## print("####### AGENTS PLAYING:", agent_index, agent_one_index)
 
             if self.current_fight_number == 0:
                 self.current_game_number += 1
-        print(observation)
+        ## print(observation)
 
-        # [my_action, game_step, enemy_hive, enemy_reward, my_agent]
-        current_players_actions = [self.agents[self.player].forward([observation[0],
-                                                                     self.game_step,
+        # [my_action, enemy_action, step, my_hive, enemy_hive, my_reward, my_index, enemy_index]
+        current_players_actions = [self.agents[self.player].forward([self.game_step,
+                                                                     observation[1],
+                                                                     observation[0],
+                                                                     self.player,
                                                                      self.player_one,
-                                                                     observation[3][1],
+                                                                     observation[3][0],
                                                                      agent_index,
                                                                      agent_one_index
                                                                      ]),
-                                   self.agents[self.player_one].forward([observation[1],
-                                                                         self.game_step,
+                                   self.agents[self.player_one].forward([self.game_step,
+                                                                         observation[0],
+                                                                         observation[1],
+                                                                         self.player_one,
                                                                          self.player,
-                                                                         observation[3][0],
+                                                                         observation[3][1],
                                                                          agent_one_index,
                                                                          agent_index
                                                                          ])]
