@@ -1,16 +1,4 @@
-# Generate three 43x43 empty grid lists.
-carnivores_pos = []
-
-
-for i in range(0, 43):
-    carnivores_pos.append([])
-    for j in range(0, 43):
-        carnivores_pos[i].append([])
-
-
-
-
-
+# Generate hex grid and boundary tiles list for a grid of {diameter} size.
 carnivores_pos_hex = []
 boundary_tiles = []
 diameter = 45
@@ -27,11 +15,11 @@ for j in range((int(diameter/2)+1),(diameter*2)-1):
         boundary_tiles.append([row_quantity-1, j-(int(diameter/2)+1)])
     for i in range(0, row_quantity):
         row.append([])
-
+        
     carnivores_pos_hex.append(row)
 
-#print(carnivores_pos_hex[0])
 
+# Complete boundary tiles list.
 for i in range(len(carnivores_pos_hex[0])):
     boundary_tiles.append([i, 0])
 
@@ -40,7 +28,3 @@ for i in range(len(carnivores_pos_hex[diameter-1])):
 
 for i in range(diameter-1):
     boundary_tiles.append([0, i])
-
-
-
-# print("\n", boundary_tiles)
