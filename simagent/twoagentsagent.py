@@ -665,7 +665,6 @@ class TwoAgentsAgent(object):
                                     self.forbidden_move = "se"
 
                             if self.coord_x == pre_previous_coord_x and self.coord_y == pre_previous_coord_y:
-                                #print("####### WLASNIE ZAPOBIEGNIETO COFNIECIU SIE #######")
                                 self.coord_x = self.previous_coord_x
                                 self.coord_y = self.previous_coord_y
                         else:
