@@ -1,4 +1,4 @@
-<center># HIVE</center>
+<center>HIVE</center>
 # Requirements:
 - Python 3.7.8 64 bit
 - numpy==1.18.5
