@@ -21,7 +21,7 @@ Platform created to facilitate conducting spatial multi-agent iterated prisoner'
 <h2>:chart_with_upwards_trend: Changelog:</h2>
 
 :date: 01.02.2021
-- special no GUI version for conducting experiments
+- no GUI version for faster experiments
 
 :date: 03.01.2021
 - board's nature is hexagonal now instead of rectangular
