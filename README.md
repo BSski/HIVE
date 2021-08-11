@@ -1,6 +1,6 @@
 <b><h1 align="center">HIVE</h1></b>
 
-<h3>Requirements:</h3>
+<h2>Requirements:</h2>
 - Python 3.7.8 64 bit
 - numpy==1.18.5
 - pygame==1.9.6
@@ -15,7 +15,7 @@
 
 
 
-<h3>:chart_with_upwards_trend: Changelog:</h3>
+<h2>:chart_with_upwards_trend: Changelog:</h2>
 
 :date: 01.02.2021
 - special no GUI version for conducting experiments
