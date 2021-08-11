@@ -1,5 +1,8 @@
 <b><h1 align="center">HIVE</h1></b>
 
+Platform created to facilitate conducting spatial multi-agent iterated prisoner's dilemma experiments between hives controlled by artificial neural networks. Built using deep reinforcement learning algorithm - DDDQN (Double Dueling Deep Q-Network).
+
+
 <h2>:white_check_mark: Requirements:</h2>
 
 - Python 3.7.8 64 bit
