@@ -20,8 +20,8 @@ from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 
 #############################################################################
-# .csv part
-
+# CSV part
+# Warning before overwriting data flag.
 erase_csv_warning = 0
 
 # Asking the user whether to overwrite all .csv files.
@@ -31,12 +31,12 @@ if erase_csv_warning == 1:
 
     if answer != 'yes' and answer != 'Yes' and answer != 'YES':
         sys.exit("\n*** You decided not to proceed with the program. ***")
-
+        
+# TODO: Change to 'with' so it's safe.
 # Clearing all .csv files.
 for i in range(9):
     for j in range(9):
         file_name = 'csv output/{}.csv'.format([i, j])
-        # Opening the file with w+ mode truncates the file.
         f = open(file_name, "w+")
         f.write("")
         f.close()
@@ -48,7 +48,7 @@ env = gym.make('gym_tdh:Tdh-v0')
 np.random.seed()
 env.seed()
 
-nb_actions = 10  # DQN
+nb_actions = 10
 # print("Actions:", env.action_space.shape[0])
 # print("States:", env.observation_space.shape[0])
 
@@ -130,6 +130,7 @@ randomagent = RandomAgent(nb_actions)
 sus_titfortat = SuspiciousTitForTatAgent(nb_actions)
 titfortat = TitForTatAgent(nb_actions)
 
+
 #############################################################################
 ############################      SETTINGS      #############################
 #############################################################################
@@ -143,14 +144,15 @@ nb_agents_in_hives = [10,  # DQN_one
                       10,  # AlwaysDefect
                       10,  # GRIM
                       10,  # Imperfect TFT
-                      0,  # Random
-                      0,  # Suspicious TFT
-                      0  # Tit For Tat
+                      0,   # Random
+                      0,   # Suspicious TFT
+                      0    # Tit For Tat
                       ]
 
 #############################################################################
 #############################################################################
 #############################################################################
+
 
 optimizers_list = []
 metrics_list = []
@@ -159,9 +161,7 @@ for i in range(len(hives_list)):
 for i in range(len(hives_list)):
     metrics_list.append(['mae'])
 
-
-# dodaj, ze jesli jeden i drugi agent sa NPCami, to nie odgrywa miedzy nimi gry
-# while True:
+# Conduct the experiment.
 for i in range(30):
     sim_agent = SimultaneousAgent(hives_list)
     sim_agent.compile(optimizers_list, metrics=metrics_list)
@@ -173,22 +173,3 @@ for i in range(30):
         break
 
 print("\n\n\n*** Done! The results are ready. ***\n\n")
-
-
-
-# n = sim_agent.get_n()
-# agents_games_log = sim_agent.get_agents_games_log()
-# rewards_history = sim_agent.get_rewards_history()
-"""
-hives_names = {
-1: "DQN_one",
-2: "DQN_two",
-3: "AlwaysCoop",
-4: "AlwaysDefect",
-5: "GRIM",
-6: "Imperfect TFT",
-7: "Random",
-8: "Suspicious TFT",
-9: "Tit For Tat"
-}
-"""
