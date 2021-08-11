@@ -14,7 +14,7 @@ Requirements:
 
 
 
-:chart_with_upwards_trend: Changelog:
+# :chart_with_upwards_trend: Changelog:
 
 :date: 01.02.2021
 - special no GUI version for conducting experiments
