@@ -1,4 +1,4 @@
-<b><h1 align="center">HIVE</h1></b>
+<center><b><h1 align="center">HIVE</h1></b>
 
 # Requirements:
 - Python 3.7.8 64 bit
@@ -58,3 +58,4 @@
 :date: 16.09.2020
 - created the repository
 - added prisoner's dilemma basic mechanism
+  </center>
