@@ -250,7 +250,7 @@ class DQNAgent(AbstractDQNAgent):
         # Train the network on a single stochastic batch.
         if self.step > self.nb_steps_warmup and self.step % self.train_interval == 0:
             experiences = self.memory.sample(self.batch_size)
-            print("EXP^^^^^:", experiences)
+            print("EXP:", experiences)
             assert len(experiences) == self.batch_size
 
             # Start by extracting the necessary parameters (we use a vectorized implementation).
@@ -310,7 +310,6 @@ class DQNAgent(AbstractDQNAgent):
             # Set discounted reward to zero for all states that were terminal.
             discounted_reward_batch *= terminal1_batch
             assert discounted_reward_batch.shape == reward_batch.shape
-            #print("SK Reward batch:", len(reward_batch), reward_batch, len(discounted_reward_batch))
             Rs = reward_batch + discounted_reward_batch
             for idx, (target, mask, R, action) in enumerate(zip(targets, masks, Rs, action_batch)):
                 target[action] = R  # update action with estimated accumulated reward
@@ -324,10 +323,8 @@ class DQNAgent(AbstractDQNAgent):
             # it is still useful to know the actual target to compute metrics properly.
 
             ins = [state0_batch] if type(self.model.input) is not list else state0_batch
-            #print("\n324 ins:\n", ins, "\n324 targets:\n", targets, "\n324 masks:\n", masks,"\n324 dummy_targets:\n", dummy_targets,"\n324 targets:\n", targets)
             metrics = self.trainable_model.train_on_batch(ins + [targets, masks], [dummy_targets, targets])
             metrics = [metric for idx, metric in enumerate(metrics) if idx not in (1, 2)]  # throw away individual losses
-            #print("SK Metrics:", metrics)
             metrics += self.policy.metrics
             if self.processor is not None:
                 metrics += self.processor.metrics
