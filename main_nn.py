@@ -26,7 +26,8 @@ erase_csv_warning = 0
 
 # Asking the user whether to overwrite all .csv files.
 if erase_csv_warning == 1:
-    warning = "\n\n*** WARNING: Running this file will overwrite all previous.csv files. Do you want to proceed? [yes/no]: *** "
+    warning = "\n\n*** WARNING: Running this file will overwrite all" \
+              " previous.csv files. Do you want to proceed? [yes/no]: *** "
     answer = input(warning)
 
     if answer != 'yes' and answer != 'Yes' and answer != 'YES':
