@@ -4,7 +4,7 @@
 Platform created to facilitate conducting spatial multi-agent iterated prisoner's dilemma experiments between groups controlled by artificial neural networks. Built using deep reinforcement learning algorithm - DDDQN (Double Dueling Deep Q-Network).
 
 Based on keras-rl.
-Simultaneous agent inspired by <url="https://github.com/velochy/rl-bargaining/blob/master/interleaved.py">interleaved.py by Velochy</url>.
+Simultaneous agent inspired by <a href="https://github.com/velochy/rl-bargaining/blob/master/interleaved.py">interleaved.py by Velochy</a>.
 
 <h2>:white_check_mark: Requirements:</h2>
 
