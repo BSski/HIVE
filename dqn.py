@@ -15,8 +15,6 @@ def mean_q(y_true, y_pred):
 
 
 class AbstractDQNAgent(Agent):
-    """Write me
-    """
     def __init__(self, nb_actions, memory, gamma=.99, batch_size=32, nb_steps_warmup=1000,
                  train_interval=1, memory_interval=1, target_model_update=10000,
                  delta_range=None, delta_clip=np.inf, custom_model_objects={}, **kwargs):
