@@ -1,4 +1,4 @@
-<b><h1 align="center">HIVE<a>(work in progress)</h1></b>
+<b><h1 align="center">HIVE<br>(work in progress)</h1></b>
 
 Platform created to facilitate conducting spatial multi-agent iterated prisoner's dilemma experiments between groups controlled by artificial neural networks. Built using deep reinforcement learning algorithm - DDDQN (Double Dueling Deep Q-Network).
 
