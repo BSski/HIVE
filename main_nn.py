@@ -19,7 +19,6 @@ from rl.agents.dqn import DQNAgent
 from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 
-#############################################################################
 # CSV part
 # Warning before overwriting data flag.
 erase_csv_warning = 0
@@ -41,8 +40,6 @@ for i in range(9):
         f = open(file_name, "w+")
         f.write("")
         f.close()
-
-#############################################################################
 
 # Env initialization.
 env = gym.make('gym_tdh:Tdh-v0')
@@ -132,10 +129,7 @@ sus_titfortat = SuspiciousTitForTatAgent(nb_actions)
 titfortat = TitForTatAgent(nb_actions)
 
 
-#############################################################################
-############################      SETTINGS      #############################
-#############################################################################
-
+# SETTINGS
 # Neural network agents first!
 hives_list = [dqn_one, dqn_two, dqn_three, dqn_four,
               dqn_five, dqn_six, randomagent, sus_titfortat, titfortat]
@@ -149,11 +143,6 @@ nb_agents_in_hives = [10,  # DQN_one
                       0,   # Suspicious TFT
                       0    # Tit For Tat
                       ]
-
-#############################################################################
-#############################################################################
-#############################################################################
-
 
 optimizers_list = []
 metrics_list = []
