@@ -5,7 +5,8 @@ Platform created to facilitate conducting spatial multi-agent iterated prisoner'
 
 Based on <a href="https://github.com/wau/keras-rl2">keras-rl2</a>.
 Simultaneous agent inspired by <a href="https://github.com/velochy/rl-bargaining/blob/master/interleaved.py">interleaved.py by Velochy</a>.
-
+Most of the code was written in 2020. I have learned a lot since then and I am aware of the quality of it.
+ 
 <h2>:white_check_mark: Requirements:</h2>
 
 - Python 3.7.8 64 bit
