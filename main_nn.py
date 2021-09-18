@@ -1,10 +1,11 @@
 import numpy as np
 import gym
 import sys
+import tensorflow
 
-from keras.models import Sequential, clone_model
-from keras.layers import Dense, Flatten
-from keras.optimizers import Adam
+from tensorflow.keras.models import Sequential, clone_model
+from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.optimizers import Adam
 from simagent.simultaneous import SimultaneousAgent
 
 from npcs.alwayscooperate import AlwaysCooperateAgent
@@ -19,19 +20,19 @@ from rl.agents.dqn import DQNAgent
 from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 
+#############################################################################
 # CSV part
 # Warning before overwriting data flag.
 erase_csv_warning = 0
 
 # Asking the user whether to overwrite all .csv files.
 if erase_csv_warning == 1:
-    warning = "\n\n*** WARNING: Running this file will overwrite all" \
-              " previous.csv files. Do you want to proceed? [yes/no]: *** "
+    warning = "\n\n*** WARNING: Running this file will overwrite all previous.csv files. Do you want to proceed? [yes/no]: *** "
     answer = input(warning)
 
     if answer != 'yes' and answer != 'Yes' and answer != 'YES':
         sys.exit("\n*** You decided not to proceed with the program. ***")
-        
+
 # TODO: Change to 'with' so it's safe.
 # Clearing all .csv files.
 for i in range(9):
@@ -40,6 +41,8 @@ for i in range(9):
         f = open(file_name, "w+")
         f.write("")
         f.close()
+
+#############################################################################
 
 # Env initialization.
 env = gym.make('gym_tdh:Tdh-v0')
@@ -129,7 +132,10 @@ sus_titfortat = SuspiciousTitForTatAgent(nb_actions)
 titfortat = TitForTatAgent(nb_actions)
 
 
-# SETTINGS
+#############################################################################
+############################      SETTINGS      #############################
+#############################################################################
+
 # Neural network agents first!
 hives_list = [dqn_one, dqn_two, dqn_three, dqn_four,
               dqn_five, dqn_six, randomagent, sus_titfortat, titfortat]
@@ -143,6 +149,11 @@ nb_agents_in_hives = [10,  # DQN_one
                       0,   # Suspicious TFT
                       0    # Tit For Tat
                       ]
+
+#############################################################################
+#############################################################################
+#############################################################################
+
 
 optimizers_list = []
 metrics_list = []

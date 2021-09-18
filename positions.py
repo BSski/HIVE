@@ -15,10 +15,10 @@ for j in range((int(diameter/2)+1),(diameter*2)-1):
         boundary_tiles.append([row_quantity-1, j-(int(diameter/2)+1)])
     for i in range(0, row_quantity):
         row.append([])
-        
+
     carnivores_pos_hex.append(row)
 
-    
+
 # Complete boundary tiles list.
 for i in range(len(carnivores_pos_hex[0])):
     boundary_tiles.append([i, 0])
