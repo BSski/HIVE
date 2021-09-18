@@ -10,14 +10,12 @@ Most of the code was written in 2020. I have learned a lot since then and I am a
 <h2>:white_check_mark: Requirements:</h2>
 
 - Python 3.7.8 64 bit
-- numpy==1.18.5
 - pygame==1.9.6
-- gym==0.17.2
-- pandas==1.1.0
-- matplotlib==3.3.0
 - tensorflow==2.3.0
+- numpy==1.18.5
+- gym==0.17.2
+- matplotlib==3.3.0
 - keras_rl2==1.0.4
-- Keras==2.4.3
 - rl==3.0
 - theano==1.0.5
 
