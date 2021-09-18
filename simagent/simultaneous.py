@@ -1,6 +1,6 @@
 import numpy as np
 
-from keras.layers import Concatenate
+from tensorflow.keras.layers import Concatenate
 from os.path import splitext
 from simagent.twoagentsagent import TwoAgentsAgent
 

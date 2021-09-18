@@ -5,7 +5,7 @@ import datetime
 
 import numpy as np
 import matplotlib.pyplot as pp
-from keras.callbacks import History
+from tensorflow.keras.callbacks import History
 
 from callbacks import (
     CallbackList,
@@ -389,19 +389,25 @@ class TwoAgentsAgent(object):
             # Drawing amount of agents present for each hive and hives' balances.
             icons_div = 88
             hive_icons_colors = [( 255, 255, 255), ( 255,   0,   0), (   0, 255,   0),
-                                 (   0,   0, 255), ( 255, 255,   0), (   0, 255, 255),
+                                 (130, 83, 170), ( 255, 255,   0), (   0, 255, 255),
                                  ( 255,   0, 255), ( 128, 128,   0), (   0, 128,   0)]
+
+
+            text_to_blit = font2.render("Number of agents:", True, (50, 50, 50))
+            screen.blit(text_to_blit, (23, icons_div+10))
+            text_to_blit = font2.render("Balance:", True, (50, 50, 50))
+            screen.blit(text_to_blit, (23, icons_div+15*10+10+10))
             for i in range(0, 9):
                 # Drawing amount of agents present for each hive.
-                pygame.draw.rect(screen, hive_icons_colors[i], [25 , (icons_div+15*i), 9, 9])
-                pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*i)-1, 11, 11], 1)
+                pygame.draw.rect(screen, hive_icons_colors[i], [26, (icons_div+15*i+25), 9, 9])
+                pygame.draw.rect(screen, DARKERGRAY, [26-1, (icons_div+15*i)-1+25, 11, 11], 1)
                 text_to_blit = font2.render(str(nb_agents_in_hives[i]), True, (50, 50, 50))
-                screen.blit(text_to_blit, (38, icons_div+15*i))
+                screen.blit(text_to_blit, (40, icons_div+15*i+25))
                 # Drawing hives' balances.
-                pygame.draw.rect(screen, hive_icons_colors[i], [25 , (icons_div+15*(10+i)), 9, 9])
-                pygame.draw.rect(screen, DARKERGRAY, [25-1, (icons_div+15*(10+i))-1, 11, 11], 1)
+                pygame.draw.rect(screen, hive_icons_colors[i], [26, (icons_div+15*(10+i)+35), 9, 9])
+                pygame.draw.rect(screen, DARKERGRAY, [26-1, (icons_div+15*(10+i))-1+35, 11, 11], 1)
                 text_to_blit = font2.render(str(sum_of_cash_for_hives[i]), True, (50, 50, 50))
-                screen.blit(text_to_blit, (38, icons_div+15*(10+i)))
+                screen.blit(text_to_blit, (40, icons_div+15*(10+i)+35))
 
             # Drawing hives' balances against each other table.
             table_interline = 18
@@ -411,6 +417,9 @@ class TwoAgentsAgent(object):
 
             pygame.draw.line(screen, DARKERGRAY, (table_starting_x, 460+table_interline*1.8), (table_starting_x+table_columns_width*7, 460+table_interline*1.8), 1)
             pygame.draw.line(screen, DARKERGRAY, (table_starting_x+table_columns_width*0.5, 460+table_interline*1.2), (table_starting_x+table_columns_width*0.5, 460+table_interline*8), 1)
+            text_to_blit = font2.render('Balances against:', True, (50, 50, 50))
+            screen.blit(text_to_blit, (table_starting_x, table_starting_y))
+
 
             # Drawing vertical H1-H7 of the table.
             for i in range(2, 8):
@@ -519,27 +528,55 @@ class TwoAgentsAgent(object):
                                  (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]+8),
                                  (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]+8),
                                  1)
+
                 pygame.draw.rect(screen, self.colors_dict[self.hive][0],
                                  [grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1, 7, 7])
 
-                pygame.draw.circle(screen, self.colors_dict[self.hive][1],
-                                   (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1),
-                                   0)
-                pygame.draw.circle(screen, self.colors_dict[self.hive][1],
-                                   (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+1),
-                                   0)
-                pygame.draw.circle(screen, self.colors_dict[self.hive][1],
-                                   (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+7),
-                                   0)
-                pygame.draw.circle(screen, self.colors_dict[self.hive][1],
-                                   (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+7),
-                                   0)
-                pygame.draw.circle(screen, GRAY,
-                                   (grid_hex[self.coord_y][self.coord_x][0]+6, grid_hex[self.coord_y][self.coord_x][1]+2),
-                                   0)
-                pygame.draw.circle(screen, DARKERGRAY,
-                                   (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8-8),
-                                   0)
+
+                pygame.draw.line(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0], grid_hex[self.coord_y][self.coord_x][1]+1),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]),
+                                 1)
+
+                pygame.draw.line(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+8, grid_hex[self.coord_y][self.coord_x][1]+1),
+                                 1)
+
+                pygame.draw.line(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0], grid_hex[self.coord_y][self.coord_x][1]+7),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+8),
+                                 1)
+
+                pygame.draw.line(screen, DARKERGRAY,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+8, grid_hex[self.coord_y][self.coord_x][1]+7),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+8),
+                                 1)
+
+                # Darker inner corners
+                pygame.draw.line(screen, self.colors_dict[self.hive][1],
+                                 (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+7),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+7),
+                                 1)
+                pygame.draw.line(screen, self.colors_dict[self.hive][1],
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+7),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+7),
+                                 1)
+                pygame.draw.line(screen, self.colors_dict[self.hive][1],
+                                 (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+1),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+7, grid_hex[self.coord_y][self.coord_x][1]+1),
+                                 1)
+                pygame.draw.line(screen, self.colors_dict[self.hive][1],
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+1, grid_hex[self.coord_y][self.coord_x][1]+1),
+                                 1)
+
+                # Sheen
+                pygame.draw.line(screen, WHITE,
+                                 (grid_hex[self.coord_y][self.coord_x][0]+6, grid_hex[self.coord_y][self.coord_x][1]+2),
+                                 (grid_hex[self.coord_y][self.coord_x][0]+6, grid_hex[self.coord_y][self.coord_x][1]+2),
+                                 1)
+
 
                 # Draw its border.
                 pygame.draw.line(screen, DARKERGRAY,
@@ -558,30 +595,7 @@ class TwoAgentsAgent(object):
                                  (grid_hex[self.coord_y][self.coord_x][0]+2, grid_hex[self.coord_y][self.coord_x][1]+8+1),
                                  (grid_hex[self.coord_y][self.coord_x][0]+2+4, grid_hex[self.coord_y][self.coord_x][1]+8+1),
                                  1)
-                pygame.draw.circle(screen, DARKERGRAY,
-                                 (grid_hex[self.coord_y][self.coord_x][0]+2-2, grid_hex[self.coord_y][self.coord_x][1]+8-7),
-                                 0)
-                pygame.draw.circle(screen, DARKERGRAY,
-                                 (grid_hex[self.coord_y][self.coord_x][0]+2-1, grid_hex[self.coord_y][self.coord_x][1]+8-8),
-                                 0)
-                pygame.draw.circle(screen, DARKERGRAY,
-                                 (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8-8),
-                                 0)
-                pygame.draw.circle(screen, DARKERGRAY,
-                                 (grid_hex[self.coord_y][self.coord_x][0]+2+6, grid_hex[self.coord_y][self.coord_x][1]+8-7),
-                                 0)
-                pygame.draw.circle(screen, DARKERGRAY,
-                                 (grid_hex[self.coord_y][self.coord_x][0]+2+5, grid_hex[self.coord_y][self.coord_x][1]+8+0),
-                                 0)
-                pygame.draw.circle(screen, DARKERGRAY,
-                                 (grid_hex[self.coord_y][self.coord_x][0]+2+6, grid_hex[self.coord_y][self.coord_x][1]+8-1),
-                                 0)
-                pygame.draw.circle(screen, DARKERGRAY,
-                                 (grid_hex[self.coord_y][self.coord_x][0]+2-1, grid_hex[self.coord_y][self.coord_x][1]+8+0),
-                                 0)
-                pygame.draw.circle(screen, DARKERGRAY,
-                                 (grid_hex[self.coord_y][self.coord_x][0]+2-2, grid_hex[self.coord_y][self.coord_x][1]+8-1),
-                                 0)
+
 
             # Move the animal in the positions list and change its coordinates.
             def move(self):
@@ -665,6 +679,7 @@ class TwoAgentsAgent(object):
                                     self.forbidden_move = "se"
 
                             if self.coord_x == pre_previous_coord_x and self.coord_y == pre_previous_coord_y:
+                                #print("####### WLASNIE ZAPOBIEGNIETO COFNIECIU SIE #######")
                                 self.coord_x = self.previous_coord_x
                                 self.coord_y = self.previous_coord_y
                         else:
@@ -876,7 +891,7 @@ class TwoAgentsAgent(object):
                 # Animation to prevent Windows from hanging the window when paused.
                 # Also useful in approximating lag.
                 text_to_blit = font5.render(animation[0], True, (50, 50, 50))
-                screen.blit(text_to_blit, (847, 651))
+                screen.blit(text_to_blit, (847, 649))
                 animation = animation + animation[0]
                 animation = animation[1:]
 
@@ -937,6 +952,7 @@ class TwoAgentsAgent(object):
                         if j.get_coords()[0] == i.get_coords()[0] and j.get_coords()[1] == i.get_coords()[1]:
                             # If the coords of both agents are the same:
                             if int(counter_prev) != int(counter) and int(counter) % 4 == 0:  # maybe this could be put before both loops
+                            # this could be optimized by not checking agents that were checked already. Create a hashtable for this purpose.
                                 # Agents move every X frames, this 'if' makes sure there won't be X identical fights queued between moves.
                                 if not (j.index in agents_fighting_queue or i.index in agents_fighting_queue):
                                     # If both agents are not present in the list of agents fighting in current queue:
