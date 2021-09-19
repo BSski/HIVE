@@ -9,7 +9,7 @@ Most of the code was written in 2020. I have learned a lot since then and I am a
  
 <h2>:white_check_mark: Requirements:</h2>
 
-- Python 3.7.8 64 bit
+- Python 3.7.11 64 bit
 - pygame==1.9.6
 - tensorflow==2.3.0
 - numpy==1.18.5
