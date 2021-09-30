@@ -1,6 +1,6 @@
 <b><h1 align="center">HIVE</h1></b>
 
-Platform created to facilitate conducting spatial multi-agent iterated prisoner's dilemma experiments between groups controlled by artificial neural networks. Built using deep reinforcement learning algorithm - DDDQN (Double Dueling Deep Q-Network).
+Platform created to facilitate conducting spatial multi-agent iterated prisoner's dilemma experiments between groups controlled by RL algorithm incorporating artificial neural networks. Uses Double Dueling Deep Q-Network, a deep reinforcement learning algorithm.
 
 Based on <a href="https://github.com/wau/keras-rl2">keras-rl2</a>.  
 Simultaneous agent inspired by <a href="https://github.com/velochy/rl-bargaining/blob/master/interleaved.py">interleaved.py by Velochy</a>.  
