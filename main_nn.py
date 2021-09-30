@@ -23,7 +23,7 @@ from rl.memory import SequentialMemory
 #############################################################################
 # CSV part
 # Warning before overwriting data flag.
-erase_csv_warning = 0
+erase_csv_warning = 1
 
 # Asking the user whether to overwrite all .csv files.
 if erase_csv_warning == 1:
