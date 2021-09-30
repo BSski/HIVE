@@ -383,7 +383,6 @@ class TwoAgentsAgent(object):
                     for j in range(len(hives_balance_against[i])):
                         temp_sum += hives_balance_against[i][j]
                     temp_sum_of_cash_for_hives.append(temp_sum)
-                #print("SUM:", sum_of_cash_for_hives)
                 sum_of_cash_for_hives = temp_sum_of_cash_for_hives
 
             # Drawing amount of agents present for each hive and hives' balances.
@@ -393,9 +392,9 @@ class TwoAgentsAgent(object):
                                  ( 255,   0, 255), ( 128, 128,   0), (   0, 128,   0)]
 
 
-            text_to_blit = font2.render("Number of agents:", True, (50, 50, 50))
+            text_to_blit = font2.render("Liczba agentów:", True, (50, 50, 50))
             screen.blit(text_to_blit, (23, icons_div+10))
-            text_to_blit = font2.render("Balance:", True, (50, 50, 50))
+            text_to_blit = font2.render("Suma nagród rojów:", True, (50, 50, 50))
             screen.blit(text_to_blit, (23, icons_div+15*10+10+10))
             for i in range(0, 9):
                 # Drawing amount of agents present for each hive.
@@ -417,7 +416,7 @@ class TwoAgentsAgent(object):
 
             pygame.draw.line(screen, DARKERGRAY, (table_starting_x, 460+table_interline*1.8), (table_starting_x+table_columns_width*7, 460+table_interline*1.8), 1)
             pygame.draw.line(screen, DARKERGRAY, (table_starting_x+table_columns_width*0.5, 460+table_interline*1.2), (table_starting_x+table_columns_width*0.5, 460+table_interline*8), 1)
-            text_to_blit = font2.render('Balances against:', True, (50, 50, 50))
+            text_to_blit = font2.render('Suma nagród vs:', True, (50, 50, 50))
             screen.blit(text_to_blit, (table_starting_x, table_starting_y))
 
 
@@ -432,18 +431,15 @@ class TwoAgentsAgent(object):
                 text_to_blit = font2.render(f'H{i+1}', True, (50, 50, 50))
                 screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*1))
                 for j in range(2, 8):
-                    if j-2 == i:
-                        text_to_blit = font2.render("-", True, (50, 50, 50))
-                        screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*j))
-                    else:
-                        text_to_blit = font2.render(str(hives_balance_against[i][j-2]), True, (50, 50, 50))
-                        screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*j))
+                    text_to_blit = font2.render(str(hives_balance_against[i][j-2]), True, (50, 50, 50))
+                    screen.blit(text_to_blit, (table_starting_x, table_starting_y+table_interline*j))
 
 
-            text_to_blit = font2.render("total episodes played: " + str(episode), True, (50, 50, 50))
-            screen.blit(text_to_blit, (19, 615))
+            text_to_blit = font2.render("Liczba rozegranych epizodów: " + str(episode), True, (50, 50, 50))
+            screen.blit(text_to_blit, (19, 623))
 
-            text_to_blit = font2.render("exit after this sim.? (backspace): " + str(self.exit_after_this_sim), True, (50, 50, 50))
+            text_to_blit = font2.render("Wyjść po zakończeniu tej symulacji? (backspace): "
+                                        + ("Tak" if self.exit_after_this_sim else "Nie"), True, (50, 50, 50))
             screen.blit(text_to_blit, (19, 645))
 
 
@@ -872,6 +868,7 @@ class TwoAgentsAgent(object):
                         if fighter_one == fighter_two:
                             # If fighters are from the same hive:
                             self.rewards_history[fighter_one][fighter_two].append((episode_reward[0] + episode_reward[1])/2)
+                            hives_balance_against[fighter_one][fighter_two] += int((episode_reward[0] + episode_reward[1])/2)
                         else:
                             # If fighters are from different hives:
                             self.rewards_history[fighter_one][fighter_two].append(episode_reward[0])
