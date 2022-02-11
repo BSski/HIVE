@@ -2,7 +2,7 @@
 
 <hr>
 <b><p align="center">WARNING: VERY OLD CODE</p></b>
-__Most of the code was written in 2020. I have learned a lot since then and I am aware of the poor quality of the code.__
+<i>Most of the code was written in 2020. I have learned a lot since then and I am aware of the poor quality of the code.</i>
 <hr>
 
 Platform created to facilitate conducting spatial multi-agent iterated prisoner's dilemma experiments between groups controlled by RL algorithm incorporating artificial neural networks. Uses Double Dueling Deep Q-Network, a deep reinforcement learning algorithm.
