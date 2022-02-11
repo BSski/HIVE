@@ -1,5 +1,6 @@
 <b><h1 align="center">HIVE</h1></b>
 
+<hr>
 <b><p align="center">WARNING: VERY OLD CODE</p></b>
 _Most of the code was written in 2020. I have learned a lot since then and I am aware of the poor quality of the code._
 <hr>
