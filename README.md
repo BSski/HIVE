@@ -22,7 +22,6 @@ Simultaneous agent inspired by <a href="https://github.com/velochy/rl-bargaining
 - gym==0.17.2
 - matplotlib==3.3.0
 - keras_rl2==1.0.4
-- rl==3.0
 - theano==1.0.5
 
 
