@@ -12,7 +12,7 @@
 <br>
 Simultaneous agent inspired by <a href="https://github.com/velochy/rl-bargaining/blob/master/interleaved.py">interleaved.py by Velochy</a>.</p>
 
-<p align="center"><img src="./HIVE GUI.png" alt="SERG GUI" width="95%" height="63%" align="center"></p>
+<p align="center"><img src="./HIVE GUI.png" alt="HIVE GUI" width="95%" height="63%" align="center"></p>
 
 <br>
 
