@@ -1,34 +1,71 @@
-<b><h1 align="center">HIVE</h1></b>
-
+<br>
 <hr>
 <b><p align="center">WARNING: VERY OLD CODE</p></b>
 <i><p align="center">Most of the code was written in 2020. I have learned a lot since then and I am aware of the poor quality of the code.</p></i>
 <hr>
+<br>
 
 
-<p align="center">Platform created to facilitate conducting spatial multi-agent iterated prisoner's dilemma experiments between groups controlled by RL algorithm incorporating artificial neural networks. Uses Double Dueling Deep Q-Network, a deep reinforcement learning algorithm.</p>
+<p align="center">
+  <h2 align="center">HIVE</h2>
+</p>
 
-<p align="center">Based on <a href="https://github.com/wau/keras-rl2">keras-rl2</a>.
+
+<div markdown="1" align="center">
+
+[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/BSski/HIVE/blob/master/LICENSE)
+
+</div>
+
+
+## Table of contents
+* [Project description](#scroll-project-description)
+* [Interface of HIVE](#fireworks-interface-of-hive)
+* [Technologies used](#hammer-technologies-used)
+* [Room for improvement](#arrow_up-room-for-improvement)
+* [Contact](#telephone_receiver-contact)
+* [Changelog](#chart_with_upwards_trend-changelog)
+* [Author](#construction_worker-author)
+* [License](#unlock-license)
+
+
+## :scroll: Project description
+Platform created to facilitate conducting spatial multi-agent iterated prisoner's dilemma experiments between groups controlled by RL algorithm incorporating artificial neural networks. Uses Double Dueling Deep Q-Network, a deep reinforcement learning algorithm.
+
+Based on <a href="https://github.com/wau/keras-rl2">keras-rl2</a>.
 <br>
 Simultaneous agent inspired by <a href="https://github.com/velochy/rl-bargaining/blob/master/interleaved.py">interleaved.py by Velochy</a>.</p>
 
+
+## :fireworks: Interface of HIVE
+
 <p align="center"><img src="./HIVE GUI.png" alt="HIVE GUI" width="95%" height="63%" align="center"></p>
 
-<br>
 
-<h2>:white_check_mark: Requirements:</h2>
-
-- Python 3.7.11 64 bit
-- pygame==1.9.6
-- tensorflow==2.3.0
-- numpy==1.18.5
-- gym==0.17.2
-- matplotlib==3.3.0
-- keras_rl2==1.0.4
-- theano==1.0.5
+## :hammer: Technologies used
+- Python 3.7.11
+- Pygame 1.9.6
+- Numpy 1.18.5
+- OpenAI gym 0.17.2
+- Matplotlib 3.3.0
+- Keras_rl2 1.0.4
+- Tensorflow 2.3.0
+- Theano 1.0.5
 
 
-<h2>:chart_with_upwards_trend: Changelog:</h2>
+## :arrow_up: Room for improvement
+This is an old project of mine and it would certainly benefit from:
+- refactoring the code into better functions,
+- refactoring the code into different files,
+- getting rid of many anti-patterns,
+- having tests written for it.
+
+
+## :telephone_receiver: Contact
+- <contact.bsski@gmail.com>
+
+
+## :chart_with_upwards_trend: Changelog:
 
 :date: 01.02.2021
 - no GUI version for faster experiments
@@ -71,3 +108,11 @@ Simultaneous agent inspired by <a href="https://github.com/velochy/rl-bargaining
 :date: 16.09.2020
 - created the repository
 - added prisoner's dilemma basic mechanism
+
+
+## :construction_worker: Author
+- [@BSski](https://www.github.com/BSski)
+
+
+## :unlock: License
+MIT
