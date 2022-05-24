@@ -5,6 +5,10 @@
 <hr>
 <br>
 
+<p align="center">
+  <img src="./HIVE GUI.png" alt="HIVE GUI" width="95%" height="63%" align="center">
+</p>
+
 
 <p align="center">
   <h2 align="center">HIVE</h2>
@@ -20,7 +24,6 @@
 
 ## Table of contents
 * [Project description](#scroll-project-description)
-* [Interface of HIVE](#fireworks-interface-of-hive)
 * [Technologies used](#hammer-technologies-used)
 * [Room for improvement](#arrow_up-room-for-improvement)
 * [Contact](#telephone_receiver-contact)
@@ -35,11 +38,6 @@ Platform created to facilitate conducting spatial multi-agent iterated prisoner'
 Based on <a href="https://github.com/wau/keras-rl2">keras-rl2</a>.
 <br>
 Simultaneous agent inspired by <a href="https://github.com/velochy/rl-bargaining/blob/master/interleaved.py">interleaved.py by Velochy</a>.</p>
-
-
-## :fireworks: Interface of HIVE
-
-<p align="center"><img src="./HIVE GUI.png" alt="HIVE GUI" width="95%" height="63%" align="center"></p>
 
 
 ## :hammer: Technologies used
