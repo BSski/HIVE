@@ -14,12 +14,13 @@
   <h2 align="center">HIVE</h2>
 </p>
 
-
+<!--
 <div markdown="1" align="center">
 
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/BSski/HIVE/blob/master/LICENSE)
 
 </div>
+-->
 
 
 ## Table of contents
